@@ -56,6 +56,26 @@ RATE = (int(os.environ.get("COPILOT_RATE", "20")), 600)  # questions per 10 minu
 GLOBAL_PER_MIN = int(os.environ.get("COPILOT_GLOBAL_PER_MIN", "30"))  # all clients together (fallback if the client address is unreliable)
 DAILY_CAP = int(os.environ.get("COPILOT_DAILY_CAP", "50"))  # AI answers per UTC day (G-25, user decision 14 Nov)
 _hits = {}
+# Sign-in routes have their own buckets, separate from the Copilot's question budget and its global cap, so a busy
+# assistant can never stop people signing in, refreshing their session or signing out. Sign-out is never limited.
+AUTH_RATE = (int(os.environ.get("AUTH_RATE", "30")), 600)  # sign-in, register, recovery and reset attempts per 10 minutes per client
+REFRESH_RATE = (int(os.environ.get("REFRESH_RATE", "240")), 600)  # session refreshes per 10 minutes per client
+_auth_hits = {}
+
+
+def _auth_limited(key, limit, window):
+    with _rate_lock:
+        now = time.time()
+        if len(_auth_hits) > 5000:
+            for k in [k for k, v in _auth_hits.items() if not v or now - v[-1] >= window]:
+                _auth_hits.pop(k, None)
+        q = [t for t in _auth_hits.get(key, []) if now - t < window]
+        if len(q) >= limit:
+            _auth_hits[key] = q
+            return True
+        q.append(now)
+        _auth_hits[key] = q
+        return False
 _global = []
 _day = {"date": "", "n": 0}
 
@@ -418,8 +438,10 @@ class H(BaseHTTPRequestHandler):
             except ValueError as e:
                 if str(e) == 'already_resolved': return self._json(409, {'error': 'already_resolved'})
                 return self._json(403, {'error': 'forbidden_or_invalid_request'})
-        if self.path.startswith("/api/auth/") and _limited(_client(self)):
-            return self._json(429, {"error": "rate_limited"})
+        if self.path.startswith("/api/auth/") and self.path != "/api/auth/logout":
+            refresh = self.path == "/api/auth/refresh"
+            if _auth_limited(("refresh:" if refresh else "auth:") + _client(self), *(REFRESH_RATE if refresh else AUTH_RATE)):
+                return self._json(429, {"error": "rate_limited"})
         if self.path == "/api/auth/refresh":
             try:
                 user, refresh = auth.rotate_refresh(self._cookie('pn_refresh'))
