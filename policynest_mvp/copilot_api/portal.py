@@ -11,6 +11,7 @@ import sqlite3
 import time
 
 import auth
+import guard
 import policy
 
 
@@ -38,7 +39,9 @@ def init():
           stage TEXT NOT NULL DEFAULT '', doc TEXT NOT NULL DEFAULT '', action TEXT NOT NULL DEFAULT '',
           read INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, reference TEXT NOT NULL DEFAULT '')""")
         cols = {r[1] for r in db.execute('PRAGMA table_info(applications)')}
-        for name in ('submitted_at', 'last_submitted_at'):  # when it first / last reached a reviewable state (server time)
+        # submitted_at / last_submitted_at: when it first / last reached a reviewable state (server time).
+        # human_round: the highest round the server has seen routed to a person (decision HUMAN_REVIEW).
+        for name in ('submitted_at', 'last_submitted_at', 'human_round'):
             if name not in cols:
                 db.execute('ALTER TABLE applications ADD COLUMN ' + name + ' INTEGER')
         db.execute('CREATE INDEX IF NOT EXISTS timeline_user ON timeline(user_id, t)')
@@ -171,7 +174,7 @@ def clean_details(value, stored=None):
     for k, v in out.items():  # defence in depth: no full PAN, 12-digit Aadhaar or long account number anywhere
         if k in ('mobile', 'email'):  # an email such as 9876543210@gmail.com is legitimate
             continue
-        if PAN_FULL.search(v) or re.search(r'\d{4}\s?\d{4}\s?\d{4}', v) or re.search(r'\d{9,18}', v):
+        if PAN_FULL.search(v) or guard.NUMBER_TEXT.search(v):  # also numbers written with hyphens or dots
             raise PortalError(400, 'identifier_not_accepted', field=k)
     return out
 
@@ -280,9 +283,65 @@ def is_submitted(progress):
     return progress.get('decision') is not None or str(progress.get('stage') or '').strip().lower() in SUBMITTED_STAGES
 
 
-def derive_status(progress):
+POST_VERIFICATION_STAGES = ('training', 'exam', 'certificate')
+
+
+def _progress_round(progress):
+    r = progress.get('round')
+    return int(r) if isinstance(r, int) and not isinstance(r, bool) else 0
+
+
+def past_verification(progress):
+    """True when the progress claims anything after verification: a later stage, training, an exam or a certificate."""
+    if str(progress.get('stage') or '').strip().lower() in POST_VERIFICATION_STAGES:
+        return True
+    if (progress.get('training') or {}).get('modules'):
+        return True
+    ex = progress.get('exam') or {}
+    if ex.get('score') is not None or ex.get('passed') is not None:
+        return True
+    return bool((progress.get('certificate') or {}).get('code'))
+
+
+def latest_review(db, applicant_id):
+    """The latest reviewer decision row for this applicant, or None (also before the reviews table exists)."""
+    try:
+        return db.execute('SELECT action,round FROM reviews WHERE applicant_id=? ORDER BY id DESC LIMIT 1',
+                          (applicant_id,)).fetchone()
+    except sqlite3.OperationalError:
+        return None
+
+
+def review_hold(progress, review, human_round):
+    """Why the applicant may not go past verification, or None. Reviewer decisions are authoritative:
+    - 'rejected': the latest reviewer decision is reject (only an appeal overturn, which records an approve, lifts it);
+    - 'awaiting_review': a round was routed to a person (HUMAN_REVIEW) and no reviewer has approved that round or later,
+      unless a reviewer asked for more information and the applicant has since sent a new round."""
+    if review is not None and review['action'] == 'reject':
+        return 'rejected'
+    if human_round is None:
+        return None
+    if review is not None and review['round'] >= human_round:
+        if review['action'] == 'approve':
+            return None
+        if review['action'] == 'more_info' and _progress_round(progress) > review['round']:
+            return None
+    return 'awaiting_review'
+
+
+def derive_status(progress, review=None, human_round=None):
+    hold = review_hold(progress, review, human_round)
+    current = review is not None and review['round'] >= _progress_round(progress)
+    if hold == 'rejected':
+        return 'REJECTED'
+    if current and review['action'] == 'more_info':
+        return 'NEEDS_MORE_INFO'  # a reviewer asked for more and the applicant has not sent a new round yet
+    if hold == 'awaiting_review':
+        return 'IN_REVIEW'
     if progress.get('certificate', {}).get('code'):
         return 'CERTIFIED'
+    if current and review['action'] == 'approve' and progress.get('decision') in ('APPROVE', 'HUMAN_REVIEW'):
+        return 'VERIFIED'
     d = progress.get('decision')
     if d == 'REJECT':
         return 'REJECTED'
@@ -293,6 +352,14 @@ def derive_status(progress):
     if d == 'APPROVE':
         return 'VERIFIED'
     return 'IN_PROGRESS' if progress.get('stage') not in (None, 'Before you start') else 'DRAFT'
+
+
+def refresh_status(db, user_id):
+    """Re-derive the stored status after a reviewer acts, so the queue and the applicant see the decision at once."""
+    row = db.execute('SELECT progress,human_round FROM applications WHERE user_id=?', (user_id,)).fetchone()
+    if row:
+        status = derive_status(json.loads(row['progress'] or '{}'), latest_review(db, user_id), row['human_round'])
+        db.execute('UPDATE applications SET status=? WHERE user_id=?', (status, user_id))
 
 
 def _public_app(row):
@@ -360,6 +427,14 @@ def put_application(user, body):
         details = clean_details(body['details'], stored_details) if 'details' in body else stored_details
         old_progress = json.loads(row['progress'])
         progress = clean_progress(body['progress']) if 'progress' in body else old_progress
+        human_round = row['human_round']
+        if progress.get('decision') == 'HUMAN_REVIEW':
+            human_round = max(-1 if human_round is None else human_round, _progress_round(progress))
+        review = latest_review(db, user['id'])
+        hold = review_hold(progress, review, human_round)
+        if hold and past_verification(progress):
+            # the server, not the applicant's browser, decides whether training, the exam or a certificate may start
+            raise PortalError(409, 'review_hold', reason=hold)
         now = int(time.time())
         submitted_at, last_submitted = row['submitted_at'], row['last_submitted_at']
         if is_submitted(progress):
@@ -368,9 +443,10 @@ def put_application(user, body):
             if not last_submitted or (progress.get('round'), progress.get('decision')) != (old_progress.get('round'), old_progress.get('decision')):
                 last_submitted = now
         changed = db.execute(
-            'UPDATE applications SET version=version+1,details=?,progress=?,status=?,updated_at=?,submitted_at=?,last_submitted_at=? WHERE user_id=? AND version=?',
+            'UPDATE applications SET version=version+1,details=?,progress=?,status=?,updated_at=?,submitted_at=?,last_submitted_at=?,human_round=? '
+            'WHERE user_id=? AND version=?',
             (json.dumps(details, separators=(',', ':')), json.dumps(progress, separators=(',', ':')),
-             derive_status(progress), now, submitted_at, last_submitted, user['id'], version)).rowcount
+             derive_status(progress, review, human_round), now, submitted_at, last_submitted, human_round, user['id'], version)).rowcount
         if not changed:
             current = db.execute('SELECT * FROM applications WHERE user_id=?', (user['id'],)).fetchone()
             raise PortalError(409, 'stale', application=_with_review(db, current))

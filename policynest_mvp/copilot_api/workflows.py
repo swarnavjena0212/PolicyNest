@@ -4,6 +4,7 @@ import secrets
 import time
 import re
 import auth
+import guard  # ID_NUMBER also catches numbers written with hyphens or dots
 import policy
 import portal
 
@@ -66,7 +67,7 @@ def appeals(actor, case_id, explanation=None):
         if not policy.allows(actor, action, resource): raise ValueError('forbidden')
         if explanation is not None:
             if not isinstance(explanation, str) or not 10 <= len(explanation) <= 1500: raise ValueError('invalid_explanation')
-            if re.search(r'\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b', explanation): raise ValueError('do_not_include_identity_numbers')
+            if guard.ID_NUMBER.search(explanation): raise ValueError('do_not_include_identity_numbers')
             if db.execute("SELECT 1 FROM appeals WHERE case_id=? AND status='OPEN'", (case_id,)).fetchone(): raise ValueError('appeal_open')
             reference = 'AP-' + secrets.token_hex(8)
             stored=db.execute('SELECT snapshot FROM application_snapshots WHERE user_id=?',(actor['id'],)).fetchone()
@@ -89,7 +90,7 @@ def _portal_evidence(db, user_id):
 def resolve(actor, reference, status, response):
     init()
     if status not in ('RESOLVED','MORE_INFO','ESCALATED') or not isinstance(response,str) or not 10 <= len(response) <= 1500: raise ValueError('invalid_resolution')
-    if re.search(r'\b(fraud\w*|fake|forged|tamper\w*|suspicious)\b|\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b',response,re.I):raise ValueError('unsafe_public_response')
+    if re.search(r'\b(fraud\w*|fake|forged|tamper\w*|suspicious)\b',response,re.I) or guard.ID_NUMBER.search(response):raise ValueError('unsafe_public_response')
     with auth._db() as db:
         row = db.execute('SELECT c.* FROM cases c JOIN appeals a ON a.case_id=c.id WHERE a.id=?', (reference,)).fetchone()
         if not row or not policy.allows(actor, 'appeal.resolve', dict(row)): raise ValueError('forbidden')

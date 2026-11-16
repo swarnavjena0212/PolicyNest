@@ -1891,6 +1891,13 @@ var I18N_RV={en:{
  "tm.5min":"5 minutes left in this sitting. There is no rush: when the time is up you can take 10 more minutes, or save and come back.",
  "tm.up.t":"Time's up","tm.up.b":"Take 10 more minutes, or save and come back later. Everything you have done so far is kept.",
  "tm.more":"Take 10 more minutes","tm.more.done":"10 more minutes added.","tm.saved":"Your progress is kept. You can come back at any time.",
+ "tm.up.b.unsaved":"Take 10 more minutes, or save before you leave. Right now nothing is saved: saving to your account is off and you chose not to save on this device. If you exit without saving, what you typed is lost when this tab closes.",
+ "tm.save.acct":"Save to my account and exit","tm.save.dev":"Save on this device and exit","tm.exit.nosave":"Exit without saving",
+ "tm.saved.acct":"Saved to your account. You can come back at any time. Photos are never stored, so you may be asked to add your documents again.",
+ "tm.saved.dev":"Saved on this device. You can come back at any time on this device.",
+ "tm.unsaved":"Nothing was saved. What you typed stays only until you close this tab.",
+ "tm.save.fail":"We could not save to your account just now. Nothing is lost on this screen: try again, or save on this device.",
+ "exit.b.acct":"Your progress is saved to your account. You can pick up where you stopped on any device. Photos are never stored, so you may be asked to add your documents again.",
  "lp.type":"Account type","lp.type.applicant":"Applicant","lp.type.reviewer":"Reviewer",
  "lp.type.reviewer.note":"A reviewer account needs an administrator's approval before it can review applications.",
  "lp.invite":"Admin invite code","lp.invite.hint":"Only if an administrator gave you one. Leave it empty to ask for a reviewer account.",
@@ -1928,6 +1935,13 @@ var I18N_RV={en:{
  "tm.5min":"इस बैठक में 5 मिनट बचे हैं। जल्दी करने की ज़रूरत नहीं: समय पूरा होने पर आप 10 मिनट और ले सकते हैं, या सहेजकर बाद में लौट सकते हैं।",
  "tm.up.t":"समय पूरा हुआ","tm.up.b":"10 मिनट और लें, या सहेजकर बाद में लौटें। अब तक का आपका सारा काम सुरक्षित है।",
  "tm.more":"10 मिनट और लें","tm.more.done":"10 मिनट और जोड़ दिए गए।","tm.saved":"आपकी प्रगति सुरक्षित है। आप कभी भी लौट सकते हैं।",
+ "tm.up.b.unsaved":"10 मिनट और लें, या जाने से पहले सहेजें। अभी कुछ भी सहेजा नहीं गया है: खाते में सहेजना बंद है और आपने इस डिवाइस पर सहेजना नहीं चुना। बिना सहेजे बाहर निकलने पर, यह टैब बंद होते ही आपका भरा हुआ सब मिट जाएगा।",
+ "tm.save.acct":"मेरे खाते में सहेजें और बाहर निकलें","tm.save.dev":"इस डिवाइस पर सहेजें और बाहर निकलें","tm.exit.nosave":"बिना सहेजे बाहर निकलें",
+ "tm.saved.acct":"आपके खाते में सहेज दिया गया। आप कभी भी लौट सकते हैं। फ़ोटो कभी सहेजी नहीं जातीं, इसलिए दस्तावेज़ फिर से जोड़ने को कहा जा सकता है।",
+ "tm.saved.dev":"इस डिवाइस पर सहेज दिया गया। आप इस डिवाइस पर कभी भी लौट सकते हैं।",
+ "tm.unsaved":"कुछ भी सहेजा नहीं गया। आपका भरा हुआ केवल इस टैब के बंद होने तक रहेगा।",
+ "tm.save.fail":"अभी आपके खाते में सहेजा नहीं जा सका। इस स्क्रीन पर कुछ नहीं मिटा है: फिर से कोशिश करें, या इस डिवाइस पर सहेजें।",
+ "exit.b.acct":"आपकी प्रगति आपके खाते में सहेजी गई है। आप किसी भी डिवाइस पर वहीं से आगे बढ़ सकते हैं। फ़ोटो कभी सहेजी नहीं जातीं, इसलिए दस्तावेज़ फिर से जोड़ने को कहा जा सकता है।",
  "lp.type":"खाते का प्रकार","lp.type.applicant":"आवेदक","lp.type.reviewer":"समीक्षक",
  "lp.type.reviewer.note":"समीक्षक खाते से आवेदन देखने से पहले किसी व्यवस्थापक की मंज़ूरी ज़रूरी है।",
  "lp.invite":"एडमिन आमंत्रण कोड","lp.invite.hint":"केवल तभी भरें जब किसी व्यवस्थापक ने आपको कोड दिया हो। समीक्षक खाते का अनुरोध करने के लिए इसे खाली छोड़ें।",
@@ -2813,7 +2827,7 @@ function aplSend(){
   var v=String(ta.value||"").trim();
   function bad(k){ er.hidden=false; er.textContent=T(k); ta.setAttribute("aria-invalid","true"); ta.setAttribute("aria-describedby","ap-hint ap-err"); er.focus(); }
   if(v.length<10||v.length>1500) return bad("ap.err.short");
-  if(/\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b/.test(v)) return bad("ap.err.id");
+  if(/\b\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|(^|[^\d])\d(?:[\s.\-]?\d){8,}(?!\d)/.test(v)) return bad("ap.err.id");
   if(bt) bt.disabled=true;
   accountRequest("/api/appeals",{explanation:v}).then(function(r){
     APL.draft=""; S.disputed=true; log("DISPUTE_RAISED","APPLICANT","Applicant appealed the decision · sent to a reviewer (rulebook §9)");
@@ -3462,7 +3476,27 @@ function tick(){
   if(!timerOn()||PICKING||s.pickAt) return;
   var left=sitLeft(s);
   if(left<=300000&&left>0&&!s.w5){ s.w5=1; sitStore(); persist(true); announce(T("tm.5min")); }
-  if(left<=0&&!s.due&&!modalOpen()){ s.due=1; sitStore(); persist(true); log("SITTING_TIME_UP","APPLICANT","Sitting "+s.n+" · 30-minute timer reached zero · nothing reset"); showModal(T("tm.up.t"),T("tm.up.b"),[[T("tm.more"),"m-more",1],[T("fb.exit"),"m-later"]],"m-more"); }
+  if(left<=0&&!s.due&&!modalOpen()){ s.due=1; sitStore(); persist(true); log("SITTING_TIME_UP","APPLICANT","Sitting "+s.n+" · 30-minute timer reached zero · nothing reset"); showModal(T("tm.up.t"),T(keptWhere()?"tm.up.b":"tm.up.b.unsaved"),[[T("tm.more"),"m-more",1]].concat(exitChoices()),"m-more"); }
+}
+/* Where the progress is kept right now: "account" (account saving is on and ready), "device" (consented local save), or "" (only this tab). */
+function keptWhere(){ return S.saveOK?"device":(typeof syncOn==="function"&&syncOn())?"account":""; }
+/* The ways out of a sitting. When nothing is saved yet, the applicant is offered a save first (account, when signed in as an
+   applicant, and this device), and the plain exit says plainly that nothing is saved. Progress is never wiped here. */
+function exitChoices(){
+  if(keptWhere()) return [[T("fb.exit"),"m-later"]];
+  var o=[]; if(ACCOUNT&&ACCOUNT.role==="applicant") o.push([T("tm.save.acct"),"m-save-acct"]);
+  o.push([T("tm.save.dev"),"m-save-dev"]); o.push([T("tm.exit.nosave"),"m-later"]); return o;
+}
+function exitSitting(msgKey){ endSitting("SITTING_SAVED","Applicant chose to continue later"); leaveFocus(); persist(true); show(canSee("dash")?"dash":roleOf().first); focusHead(VIEW); announce(T(msgKey)); }
+function saveDeviceExit(){ S.saveOK=true; log("SAVE_CONSENT","APPLICANT","Applicant chose to save on this device when leaving the sitting"); persist(true); exitSitting("tm.saved.dev"); }
+function saveAcctExit(){
+  if(!ACCOUNT||ACCOUNT.role!=="applicant") return saveDeviceExit();
+  CONS.sync=true; consSave(); lastSynced=""; var uid=ACCOUNT.id;
+  log("SYNC_CONSENT","APPLICANT","Applicant chose to save to their account when leaving the sitting");
+  Promise.resolve(SYNC.ready&&SYNC.uid===uid?null:appBoot(uid)).then(function(){ return syncFlush(); }).catch(function(){}).then(function(){
+    if(syncOn()&&SYNC.st&&SYNC.st.state==="saved") exitSitting("tm.saved.acct");
+    else showModal(T("tm.up.t"),T("tm.save.fail"),[[T("tm.save.acct"),"m-save-acct",1],[T("tm.save.dev"),"m-save-dev"],[T("exit.stay"),"m-close"]]);
+  });
 }
 /* The file picker or camera is open: the timer waits (its time is added back when the picker closes). */
 function pickStart(){ PICKING=true; if(S.sess&&!S.sess.pickAt) S.sess.pickAt=Date.now(); }
@@ -3507,7 +3541,8 @@ function focusUI(){
   if(S.sess&&S.step>=2) endSitting("SITTING_COMPLETE","Moved past the documents step");
   if(timerOn()) tickStart(); else timerDraw();
 }
-function askExit(){ showModal(T("exit.t"),T(S.saveOK?"exit.b.saved":"exit.b.unsaved"),[[T("fb.exit"),"m-later",1],[T("exit.stay"),"m-close"]]); }
+function askExit(){ var k=keptWhere(),ch=exitChoices(); ch[0]=[ch[0][0],ch[0][1],1];
+  showModal(T("exit.t"),T(k==="device"?"exit.b.saved":k==="account"?"exit.b.acct":"exit.b.unsaved"),ch.concat([[T("exit.stay"),"m-close"]])); }
 /* Native <dialog>: showModal() traps focus. Escape fires "cancel", which means keep working (the sitting carries on). */
 /* A dialog that is already open is never replaced: the new one waits in DQ and opens when the current one closes. */
 var DQ=[];
@@ -3531,7 +3566,9 @@ $("modal").addEventListener("cancel",function(e){ e.preventDefault(); var c=MODA
 function modalAct(a){
   closeModal();
   if(a==="m-more"){ sitExtend(); }
-  else if(a==="m-later"){ endSitting("SITTING_SAVED","Applicant chose to continue later"); leaveFocus(); persist(true); if(syncOn()) syncFlush(); show(canSee("dash")?"dash":roleOf().first); focusHead(VIEW); announce(T("tm.saved")); }
+  else if(a==="m-later"){ var kw=keptWhere(); if(kw==="account") syncFlush(); exitSitting(kw==="device"?"tm.saved":kw==="account"?"tm.saved.acct":"tm.unsaved"); }
+  else if(a==="m-save-dev"){ saveDeviceExit(); }
+  else if(a==="m-save-acct"){ saveAcctExit(); }
   else if(a==="m-newapp"){ newApplication(); }
   else if(a==="m-sync-yes"){ syncAccept(); }
   else if(a==="m-sync-no"){ syncDecline(); }
@@ -3680,7 +3717,7 @@ function intentAnswer(q){
 function cpAsk(q,isRetry){
   var assistantStarted=performance.now();
   q=String(q||"").trim(); if(!q||CP.busy) return; if($("cp").hidden) cpOpen(true);
-  if(/\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b/.test(q)){ cpPush("a",T("cp.err.id")); return; }
+  if(/\b\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|(^|[^\d])\d(?:[\s.\-]?\d){8,}(?!\d)/.test(q)){ cpPush("a",T("cp.err.id")); return; }
   if(!isRetry) cpPush("u",q); var hits=retrieve(q+" "+(S.step===1?"document photo upload":""),5),ctx=copilotContext();
   var lg=CP.log.filter(function(m){return (m.who==="u"||m.who==="a")&&!m.typing&&!m.offline}); lg.pop();
   var hist=lg.slice(-6).map(function(m){return {role:m.who==="u"?"user":"assistant",text:m.text}});
@@ -4176,7 +4213,7 @@ function syncSet(state,err){
 }
 function pDetails(){
   var f=S.f||{},o={},b=(SYNC.base&&SYNC.base.details)||{};
-  function put(k,v,max,chk){ v=String(v==null?"":v).trim(); if(!v) return; if(v.length>max) v=v.slice(0,max); if(chk&&(PAN_ANY.test(v)||/\d{4}\s?\d{4}\s?\d{4}/.test(v)||/\d{9,18}/.test(v))) return; o[k]=v; }
+  function put(k,v,max,chk){ v=String(v==null?"":v).trim(); if(!v) return; if(v.length>max) v=v.slice(0,max); if(chk&&(PAN_ANY.test(v)||/\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}/.test(v)||/\d(?:[\s.\-]?\d){8,}/.test(v))) return; o[k]=v; }
   put("name",f.name,80,1); put("dob",f.dob,10,0); put("email",f.email,254,0); put("state",f.state,40,1); put("city",f.city,60,1); put("education",f.education,40,1); put("ifsc",f.ifsc,11,1);
   var m=String(f.mobile||"").replace(/[\s\-]/g,"").replace(/^(\+91|91|0)(?=\d{10}$)/,"");
   if(/^[6-9]\d{9}$/.test(m)) o.mobile=m; else if(SYNC.masked&&!f.mobile) o.mobile=SYNC.masked;
@@ -4289,6 +4326,8 @@ function syncFlush(){
 function isNetErr(e){ return !!e&&!e.status&&(e.name==="TypeError"||/Failed to fetch|NetworkError|Load failed|network/i.test(String(e.message))); }
 function syncFail(e,pl){
   if(e&&e.status===409&&e.data&&e.data.application){ return sync409(e.data.application,pl); }
+  /* review_hold: a reviewer's decision (or a pending review) stops progress past verification on the server. Fetch the decision so this screen matches it. */
+  if(e&&e.status===409&&e.data&&e.data.error==="review_hold"){ syncSet("failed","review_hold"); rvRefresh(); return; }
   pendingPut(pl);
   if(isNetErr(e)){ SYNC.online=false; syncSet("offline"); clearTimeout(SYNC.retryT); SYNC.retryT=setTimeout(function(){ SYNC.online=true; syncFlush(); },15000); return; }
   syncSet("failed",String(e&&e.message||"error"));
@@ -4579,7 +4618,7 @@ $('guide-read').hidden=!SPEECH_OK;
 $('guide-read').addEventListener('click',function(){
   var last=CP.log.slice().reverse().find(function(m){return m.who==='a'&&m.text!=='Thinking…'});
   var text=last?last.text:guidanceText();
-  text=text.replace(/\b[A-Z]{5}\d{4}[A-Z]\b|\b\d{4}\s?\d{4}\s?\d{4}\b|\b\d{9,18}\b/g,'number hidden');
+  text=text.replace(/\b[A-Z]{5}\d{4}[A-Z]\b|\b\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}\b|\b\d(?:[\s.\-]?\d){8,}\b/g,'number hidden');
   toggleSpeak(text,$('guide-lang').value);
 });
 var recognition=null,Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -4618,7 +4657,7 @@ function rvReset(){
 }
 rvReset();
 var RV_NOTICE="Photos and document text stay on the applicant's device. You see the results of the checks, not the images.";
-var ID_RE=/\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b/;
+var ID_RE=/\b\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|(^|[^\d])\d(?:[\s.\-]?\d){8,}(?!\d)/;
 function cap(s){ s=String(s==null?"":s); return s.charAt(0).toUpperCase()+s.slice(1); }
 function issLabel(c,lang){ var k="iss."+c; return t(M_has(I18N.en,k)?k:"iss.OTHER",null,lang||"en"); }
 function docEn(k){ return I18N.en["doc."+k]||k; }
@@ -4779,7 +4818,7 @@ var RV_ERR={message_required:"Write a message to the applicant.",message_too_lon
   invalid_note:"The internal note is too long.",invalid_items:"Choose at least one valid document to ask for.",own_application:"You cannot decide your own application.",
   forbidden:"This case is assigned to another reviewer, or your role cannot do this.",not_found:"This item no longer exists.",not_submitted:"This application has not been submitted yet.",
   appeal_open:"An appeal is open on this application. Answer the appeal instead.",already_decided:"A final decision already stands for this round. The page is refreshed.",
-  already_resolved:"This appeal has already been answered. The page is refreshed.",invalid_outcome:"Choose an outcome.",invalid_decision:"Choose approve or deny.",rate_limited:"Too many requests. Wait a moment and try again."};
+  already_resolved:"This appeal has already been answered. The page is refreshed.",past_verification:"This applicant has already moved past verification (training, exam or certificate), so a decision cannot be applied now.",invalid_outcome:"Choose an outcome.",invalid_decision:"Choose approve or deny.",rate_limited:"Too many requests. Wait a moment and try again."};
 function rvErrText(e){
   var c=String(e&&e.message||"");
   if(e&&!e.status) return "We could not reach the server. Check your connection and try again.";

@@ -310,7 +310,10 @@ class Decisions(Base):
             + json.dumps(a.call('GET', '/api/applications/me/timeline')[1])
         self.assertNotIn('INTERNAL-NOTE', blob)
         self.assertNotIn('Secret Reviewer', blob)
-        self.assertNotIn(str(staff.id), json.dumps(app['review']))
+        # no reviewer identity in the applicant's copy (checked by key and by name, not by the id's digits,
+        # which can appear by chance in a timestamp or a round)
+        self.assertFalse({'reviewer', 'reviewer_id', 'note'} & set(app['review']))
+        self.assertNotIn(staff.email, json.dumps(app['review']))
         n = a.call('GET', '/api/notifications')[1]
         self.assertEqual([(i['key'], i['type'], i['action'], i['reference']) for i in n['items']], [('review.more_info', 'action', '#documents', a.ref)])
         t = a.call('GET', '/api/applications/me/timeline?actor=reviewer')[1]['items']

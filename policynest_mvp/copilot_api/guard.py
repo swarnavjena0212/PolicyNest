@@ -1,7 +1,12 @@
 """Input and output guardrails shared by /api/copilot and /api/assistant. Standard library only."""
 import re
 
-ID_NUMBER = re.compile(r"\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b")
+# A 12-digit Aadhaar, a PAN, or a long (9+ digit) number such as a bank account. Digit groups may be separated by one
+# space, hyphen or dot ("1234 5678 9012", "1234-5678-9012", "1234.5678.9012", "123-456-789-012"), so writing a number
+# with separators does not get it past the filter. NUMBER_TEXT is the digits-only part (no PAN pattern).
+_SEP = r"[\s.\-]?"
+NUMBER_TEXT = re.compile(r"\b\d{4}" + _SEP + r"\d{4}" + _SEP + r"\d{4}\b|(?<!\d)\d(?:" + _SEP + r"\d){8,}(?!\d)")
+ID_NUMBER = re.compile(NUMBER_TEXT.pattern + r"|\b[A-Za-z]{5}\d{4}[A-Za-z]\b")
 # The rulebook's own PAN *format example* (AAAAA9999A: one repeated letter, one repeated digit) is not a real number.
 _PLACEHOLDER = re.compile(r"^([A-Za-z])\1{4}(\d)\2{3}[A-Za-z]$")
 

@@ -492,6 +492,89 @@ def run_timer(browser):
     T.close()
 
 
+def _start_unsaved(dev):
+    """Begin without ticking save-on-this-device, fill the sample details and go to page 2."""
+    dev.hash("#apply")
+    dev.page.wait_for_selector('[data-act="begin"]')
+    if dev.page.is_checked("#f-save"):
+        dev.page.uncheck("#f-save")
+    dev.page.click('[data-act="begin"]')
+    dev.page.wait_for_selector("#fb-timer:not([hidden])")
+    dev.page.evaluate("document.querySelectorAll('details.demo').forEach(d=>d.open=true)")
+    dev.page.click('[data-act="sample"]')
+    dev.page.click('[data-act="details-next"]')
+
+
+def _times_up(dev, minutes=30):
+    dev.page.evaluate("window.__setOff(%d*60000+2000)" % minutes)
+    dev.page.wait_for_selector("#modal[open]", timeout=8000)
+
+
+def run_timer_unsaved(browser):
+    """Fix M3: with account saving off and no device consent, the time's-up dialog never claims progress is kept;
+    it offers a save first, and each way out tells the truth."""
+    ts = secrets.token_hex(3)
+    # signed-in applicant, account saving left off (the default)
+    U = Dev(browser, "U", clock=True)
+    email = "usha-%s@example.test" % ts
+    register(U, "Usha Unsaved", email, sync=False)
+    sign_in(U, email, "applicant")
+    U.page.wait_for_selector("#tb-refv", timeout=15000)
+    _start_unsaved(U)
+    _times_up(U)
+    U.shot("timer_times_up_unsaved")
+    body, acts = U.text("#m-b"), U.text("#m-a")
+    check("unsaved: the time's-up dialog says nothing is saved (not 'everything is kept')",
+          "nothing is saved" in body and "is kept" not in body, body)
+    check("unsaved: the dialog offers Save to my account, Save on this device and Exit without saving",
+          all(U.page.query_selector('#m-a [data-act="%s"]' % a) for a in ("m-more", "m-save-acct", "m-save-dev", "m-later"))
+          and "Exit without saving" in acts, acts)
+    U.page.click('[data-act="m-save-acct"]')
+    U.page.wait_for_function("()=>location.hash==='#dashboard'", timeout=15000)
+    srv = until(lambda: (lambda a: a if (a.get("details") or {}).get("name") else None)(U.api("GET", "/api/applications/me")["json"]["application"]))
+    check("Save to my account and exit stores the typed details on the server", bool(srv) and srv["details"]["name"] == "Rahul Kumar Sharma",
+          srv and srv.get("details"))
+    check("the confirmation says it is saved to the account", "Saved to your account" in U.text("#sr-status"), U.text("#sr-status"))
+    U.page.reload()
+    U.page.wait_for_selector("#tb-refv", timeout=15000)
+    U.hash("#apply")
+    U.page.wait_for_selector('[data-act="resume"]', timeout=15000)
+    check("after a reload the application resumes from the account (the intro does not come back)",
+          U.page.query_selector('[data-act="begin"]') is None, U.text("#view-apply")[:200])
+    check("no page errors in the account-save run", not U.errors, U.errors[:3])
+    U.close()
+
+    # signed out, no consent: the device choice, and the plain exit
+    V = Dev(browser, "V", clock=True)
+    V.goto("#apply")
+    _start_unsaved(V)
+    V.page.click('[data-act="fb-exit"]')
+    V.page.wait_for_selector("#modal[open]")
+    check("Save and exit without any saving explains the limit and offers the device save",
+          "only until you close this tab" in V.text("#m-b") and V.page.query_selector('#m-a [data-act="m-save-dev"]') is not None
+          and V.page.query_selector('#m-a [data-act="m-save-acct"]') is None, V.text("#modal"))
+    V.page.click('[data-act="m-close"]')
+    _times_up(V)
+    check("signed out: the time's-up dialog says nothing is saved", "nothing is saved" in V.text("#m-b"), V.text("#m-b"))
+    V.page.click('[data-act="m-save-dev"]')
+    V.page.wait_for_function("()=>location.hash==='#dashboard'", timeout=8000)
+    saved = V.page.evaluate("(()=>{try{return JSON.parse(localStorage.getItem('pn-onboarding-v1')).S}catch(e){return null}})()")
+    check("Save on this device and exit keeps the details on the device", bool(saved) and saved["f"]["name"] == "Rahul Kumar Sharma" and saved["saveOK"] is True)
+    V.close()
+
+    W = Dev(browser, "W", clock=True)
+    W.goto("#apply")
+    _start_unsaved(W)
+    _times_up(W)
+    W.page.click('[data-act="m-later"]')
+    W.page.wait_for_function("()=>location.hash==='#dashboard'", timeout=8000)
+    W.page.wait_for_function("()=>/Nothing was saved/.test(document.getElementById('sr-status').textContent)", timeout=5000)
+    status = W.text("#sr-status")
+    check("Exit without saving says nothing was saved (never 'Your progress is kept')", "Your progress is kept" not in status, status)
+    check("no page errors in the unsaved runs", not V.errors and not W.errors, (V.errors + W.errors)[:3])
+    W.close()
+
+
 def main():
     if not os.path.exists(os.path.join(ROOT, "policynest_mvp", "site-demo", "index.html")):
         raise SystemExit("build the demo site first: python policynest_mvp/build_site.py --mode demo")
@@ -507,6 +590,7 @@ def main():
             try:
                 run(browser)
                 run_timer(browser)
+                run_timer_unsaved(browser)
             finally:
                 browser.close()
     finally:

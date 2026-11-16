@@ -439,6 +439,10 @@ def decide(user, reference, body):
         progress = json.loads(row['progress'] or '{}')
         if not portal.is_submitted(progress):
             raise PortalError(409, 'not_submitted')
+        if portal.past_verification(progress):
+            # the applicant already moved on to training, the exam or a certificate: a decision now would leave the
+            # server and the applicant's screen disagreeing (no revoke flow exists yet)
+            raise PortalError(409, 'past_verification')
         if _open_appeals(db, row['user_id']):
             raise PortalError(409, 'appeal_open')  # answer it through POST /api/reviewer/appeals/{id}/resolve
         rnd = _round(progress)
@@ -451,6 +455,7 @@ def decide(user, reference, body):
                          (row['id'], row['user_id'], user['id'], action, message, note, json.dumps(items), rnd, 'review', now))
         _set_case(db, row['user_id'], CASE_STATUS[action], user['id'], 'REVIEW_' + action.upper())
         _record(db, row['user_id'], REVIEW_KEY[action])
+        portal.refresh_status(db, row['user_id'])
         saved = db.execute('SELECT * FROM reviews WHERE id=?', (cur.lastrowid,)).fetchone()
     return {'reference': reference, 'review': _review_out(saved)}
 
@@ -522,6 +527,7 @@ def resolve_appeal(user, appeal_id, body):
                            (app['id'], appeal['applicant_id'], user['id'], 'approve', message, note, '[]',
                             _round(json.loads(app['progress'] or '{}')), 'appeal', appeal_id, now))
             db.execute('UPDATE cases SET status=? WHERE id=?', ('KYC_APPROVED', appeal['case_id']))
+            portal.refresh_status(db, appeal['applicant_id'])
         _record(db, appeal['applicant_id'], APPEAL_KEY[outcome])
     return {'id': appeal_id, 'status': status, 'outcome': outcome, 'resolved_at': now}
 
