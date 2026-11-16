@@ -225,7 +225,13 @@ test('can(): applicants never get staff views; staff roles are scoped', () => {
   assert.equal(M.can('constructor', 'view.dashboard'), false);
   assert.equal(M.can('applicant', 'view.unknown'), false);
   assert.equal(M.can(undefined, 'view.dashboard'), false);
-  assert.deepEqual(J(M.USER_ROLES), ['applicant','reviewer','ops','admin']);
+  assert.deepEqual(J(M.USER_ROLES), ['applicant','reviewer_pending','reviewer','ops','admin']);
+  // A reviewer request waiting for an administrator has no reviewer power and no applicant views.
+  for (const a of staffViews.concat(appViews)) assert.equal(M.can('reviewer_pending', a), false, 'pending ' + a);
+  assert.equal(M.can('reviewer_pending', 'view.wait'), true);
+  // Only an administrator decides reviewer requests.
+  assert.equal(M.can('admin', 'admin.requests'), true);
+  for (const r of ['applicant','reviewer_pending','reviewer','ops']) assert.equal(M.can(r, 'admin.requests'), false, r);
 });
 
 test('applicantTimeline filters to applicant-safe events and sorts chronologically', () => {

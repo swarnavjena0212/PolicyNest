@@ -169,8 +169,9 @@ def register_ui(dev, name, email, sync=True):
           and not dev.page.is_visible("#tb-refv"), msg)
     # Choosing Reviewer with an applicant account is refused with a clear message.
     dev.page.click('[data-auth-as="reviewer"]')
-    check("reviewer choice hides Create account and shows the admin note",
-          dev.page.locator('#account-form [data-auth-mode="register"]').count() == 0)
+    # Reviewers can now request an account themselves (an administrator approves it), so Create account stays.
+    check("reviewer choice keeps Create account (reviewers request an account)",
+          dev.page.locator('#account-form [data-auth-mode="register"]').count() == 1)
     dev.page.fill("#account-password", PASSWORD)
     dev.page.click("#account-submit")
     dev.page.wait_for_selector("#account-errors:not([hidden])", timeout=15000)

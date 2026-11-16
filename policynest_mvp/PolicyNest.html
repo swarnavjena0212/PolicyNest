@@ -765,6 +765,50 @@ dialog.pdlg:not([open]){display:none}
 .choice input{width:22px;height:22px;flex:none;accent-color:var(--brand);margin-top:2px}
 .choice b{display:block}
 @media (max-width:800px){.lp-hero{grid-template-columns:minmax(0,1fr)}.lp-steps,.lp-two{grid-template-columns:minmax(0,1fr)}}
+/* RV-FE: timer, sign-up type, waiting page, reviewer requests, review console, appeals */
+.fbar .ftime[hidden],.fbar button[hidden]{display:none}
+.mbox textarea,.apform textarea,.rvsearch input,.mbox select{width:100%;background:var(--sunken);border:1px solid var(--line);border-radius:14px;padding:10px 14px;min-height:46px;font:inherit;color:var(--ink)}
+.mbox textarea,.apform textarea{min-height:110px;resize:vertical}
+.mbox textarea[aria-invalid="true"],.apform textarea[aria-invalid="true"]{border-color:var(--bad)}
+.mbox details.invite{background:var(--sunken);border-radius:14px;padding:10px 14px}
+.mbox details.invite summary{cursor:pointer;font-weight:700;font-size:.86rem;min-height:32px;display:flex;align-items:center}
+.mbox .hint{font-size:.8rem;color:var(--muted)}
+dialog.pdlg.wide{max-width:600px} dialog.pdlg.wide .mbox{max-width:600px}
+.wait-box{max-width:640px;margin:40px auto;display:flex;flex-direction:column;gap:14px}
+.wait-box h1{font-size:clamp(1.6rem,3vw,2.2rem)}
+.rvc{display:flex;flex-direction:column;gap:16px}
+.rvtabs{display:flex;flex-wrap:wrap;gap:8px}
+.rvtabs button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 16px;min-height:44px;font-weight:700;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.rvtabs button[aria-pressed="true"]{background:var(--night);color:var(--night-ink);border-color:var(--night)}
+.rvtabs .cnt{background:var(--brand);color:#141414;border-radius:999px;padding:0 8px;font-size:.78rem}
+.rvsearch{display:flex;flex-direction:column;gap:6px;max-width:460px}
+.rvsearch label{font-weight:700;font-size:.86rem}
+.rvlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.rvrow{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) auto;gap:8px 16px;align-items:center;padding:14px 18px;border-radius:20px;background:var(--surface);box-shadow:var(--shadow);color:inherit;text-decoration:none;min-height:44px}
+html[data-theme="dark"] .rvrow{border:1px solid var(--line)}
+.rvrow:hover,.rvrow:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.rvrow .rf{display:flex;flex-direction:column;gap:2px;min-width:0}
+.rvrow .rf b{overflow-wrap:anywhere}
+.rvrow .rm{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.rvrow .rw{font-size:.82rem;color:var(--muted);white-space:nowrap}
+@media (max-width:700px){.rvrow{grid-template-columns:minmax(0,1fr)}.rvrow .rw{white-space:normal}}
+.rvdocs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.rvdoc{background:var(--sunken);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.rvdoc b{font-size:.86rem}
+.rvdl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:0;font-size:.9rem}
+.rvdl dt{color:var(--muted);font-weight:600} .rvdl dd{margin:0;overflow-wrap:anywhere}
+.rvacts{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rvacts .btn{min-height:44px}
+kbd{font-family:var(--mono);font-size:.75rem;border:1px solid currentColor;border-radius:6px;padding:0 5px;opacity:.75}
+.rvtl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:.88rem}
+.rvtl li{display:flex;flex-direction:column;gap:2px;border-left:3px solid var(--line);padding-left:10px}
+.rvchk{display:flex;flex-direction:column;gap:8px;border:0;margin:0;padding:0}
+.rvchk label{display:flex;gap:10px;align-items:center;background:var(--sunken);border-radius:12px;padding:8px 12px;font-weight:600;min-height:44px;cursor:pointer}
+.rvchk input{width:20px;height:20px;accent-color:var(--brand);flex:none}
+.rvnotice{display:flex;flex-direction:row;gap:10px;align-items:flex-start}
+.rvnotice>svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+.apform{display:flex;flex-direction:column;gap:8px}
+.apform label{font-weight:700}
 </style>
 
 <a class="skip" id="skip-g" href="#main" data-t="skip.main">Skip to content</a>
@@ -810,7 +854,7 @@ dialog.pdlg:not([open]){display:none}
   </div>
   <div class="tb-row tb-2"><div class="tb-ref" id="tb-ref"></div><span id="tb-status"></span><span id="savestate" role="status" aria-live="polite" aria-atomic="true"></span></div>
 </div></header>
-<div class="fbar" id="focusbar" hidden><b>PolicyNest onboarding</b><span class="fstep" id="fb-step"></span><button type="button" data-act="cp-open" data-t="cp.fab">Ask Copilot</button><button type="button" data-act="fb-exit" data-t="fb.exit">Save and exit</button></div>
+<div class="fbar" id="focusbar" hidden><b>PolicyNest onboarding</b><span class="fstep" id="fb-step"></span><span class="ftime" id="fb-timer" role="timer" aria-atomic="true" hidden></span><button type="button" id="fb-tt" data-act="fb-timer" hidden>Hide timer</button><button type="button" data-act="cp-open" data-t="cp.fab">Ask Copilot</button><button type="button" data-act="fb-exit" data-t="fb.exit">Save and exit</button></div>
 <div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 <div class="note syncnote" id="syncnote" role="status" hidden></div>
@@ -818,6 +862,7 @@ dialog.pdlg:not([open]){display:none}
   <section id="view-dash"></section>
   <section id="view-apply" hidden></section>
   <section id="view-ops" class="ops" hidden></section>
+  <section id="view-req" class="ops" hidden></section>
   <section id="view-audit" class="ops" hidden></section>
   <section id="view-eval" class="ops" hidden></section>
   <section id="view-notif" hidden></section>
@@ -1218,7 +1263,7 @@ function rejectReasons(checks,x){
    Hindi strings below were written by Claude, not a native speaker: a native Hindi speaker should review them before production. */
 
 /**
- * @typedef {'applicant'|'reviewer'|'ops'|'admin'} UserRole
+ * @typedef {'applicant'|'reviewer_pending'|'reviewer'|'ops'|'admin'} UserRole
  * @typedef {'not_started'|'draft'|'in_progress'|'submitted'|'verifying'|'action_required'|'human_review'|'training_pending'|'exam_pending'|'certificate_pending'|'certified'|'rejected'} ApplicationStatus
  * @typedef {'details'|'documents'|'verification'|'training'|'exam'|'certificate'} JourneyStage
  * @typedef {{stage:JourneyStage, step:number, page:number, of:number, section:?string, doc:?string, milestone:?string, lastAction:?string, t:?number, labelKey:string, params:Object, route:string}} ResumePosition
@@ -1417,13 +1462,15 @@ function nextAction(S,opts){
 }
 
 /* ---- Roles. These mirror the server roles; the server enforces data access, the client only hides what a role cannot use. ---- */
-var USER_ROLES=["applicant","reviewer","ops","admin"];
+var USER_ROLES=["applicant","reviewer_pending","reviewer","ops","admin"];
 var M_APPLICANT_ACTIONS=["view.dashboard","view.application","view.documents","view.training","view.exam","view.certificate","view.notifications","view.history","view.account"];
+/* reviewer_pending: a self-registered reviewer before an administrator approves the request. It sees only the waiting page. */
 var PERMISSIONS={
  applicant:M_APPLICANT_ACTIONS,
+ reviewer_pending:["view.wait"],
  reviewer:["view.account","view.notifications","view.review","review.decide"],
  ops:["view.account","view.notifications","view.review","view.evaluation","view.audit","reports.read"],
- admin:["view.account","view.notifications","view.review","view.evaluation","view.audit","review.decide","admin.assign","reports.read"]};
+ admin:["view.account","view.notifications","view.review","view.evaluation","view.audit","review.decide","admin.assign","admin.requests","reports.read"]};
 function can(role,action){ var p=Object.prototype.hasOwnProperty.call(PERMISSIONS,role)?PERMISSIONS[role]:null; return !!p&&p.indexOf(action)>=0; }
 
 /* ---- Applicant-safe timeline. Allow-list only: anything not listed (focus, copilot, fraud, reviewer notes, security, engine payloads) is dropped. ---- */
@@ -1837,6 +1884,85 @@ hi:{
 }};
 Object.keys(I18N_UI.en).forEach(function(k){I18N.en[k]=I18N_UI.en[k]});
 Object.keys(I18N_UI.hi).forEach(function(k){I18N.hi[k]=I18N_UI.hi[k]});
+/* ===== Lane RV-FE strings: the 30-minute timer, reviewer sign-up, the waiting page, reviewer decisions and appeals as the applicant sees them,
+   and plain labels for issue codes. Hindi strings were written by Claude, not a native speaker: a native Hindi speaker should review them. ===== */
+var I18N_RV={en:{
+ "tm.left":"{time} left","tm.hide":"Hide timer","tm.show":"Show timer",
+ "tm.5min":"5 minutes left in this sitting. There is no rush: when the time is up you can take 10 more minutes, or save and come back.",
+ "tm.up.t":"Time's up","tm.up.b":"Take 10 more minutes, or save and come back later. Everything you have done so far is kept.",
+ "tm.more":"Take 10 more minutes","tm.more.done":"10 more minutes added.","tm.saved":"Your progress is kept. You can come back at any time.",
+ "lp.type":"Account type","lp.type.applicant":"Applicant","lp.type.reviewer":"Reviewer",
+ "lp.type.reviewer.note":"A reviewer account needs an administrator's approval before it can review applications.",
+ "lp.invite":"Admin invite code","lp.invite.hint":"Only if an administrator gave you one. Leave it empty to ask for a reviewer account.",
+ "lp.reviewer.sent":"Your reviewer request is sent. An administrator must approve it before you can review applications.",
+ "lp.created.admin":"Your administrator account is created. Sign in with your email and password.",
+ "lp.err.invite":"This invite code is not valid.","lp.err.rate":"Too many attempts. Please wait a while and try again.",
+ "role.reviewer_pending":"Reviewer (awaiting approval)","nav.requests":"Reviewer requests",
+ "wait.title":"Waiting for approval","wait.body":"Your reviewer request is with an administrator. You can review applications once it is approved. Nothing else is needed from you.",
+ "wait.denied.title":"Your request was not approved","wait.denied.body":"An administrator did not approve this reviewer request. If you think this is a mistake, contact your administrator.",
+ "wait.requested":"Requested {time}","wait.decided":"Decided {time}","wait.check":"Check again","wait.as":"Signed in as {email}",
+ "wait.checking":"Checking…","wait.still":"Still waiting for approval.","wait.approved":"Your request is approved. Opening the review console.",
+ "rv.msg.h":"Message from the reviewer","rv.more.h":"A reviewer asked for a few things","rv.more.b":"Fix the items below and send them for a re-check. Your application then goes back to the reviewer.",
+ "rv.item":"Please add your {doc} again: {issue}.","rv.rej.by":"A person on our team reviewed your application and made this decision.",
+ "rv.cheer.ok.t":"good news: a reviewer approved your application.","rv.cheer.ok.b":"Your 15 hours of training are unlocked.",
+ "rv.cheer.more.t":"a reviewer needs a few things from you.","rv.cheer.more.b":"Everything is listed in one place on your application.",
+ "rv.cheer.no.t":"a reviewer has made a decision.","rv.cheer.no.b":"The reason is on your application. If you disagree, you can appeal.",
+ "rv.sync.note":"A reviewer can see your application only when it is saved to your account.","rv.sync.btn":"Save to my account",
+ "ap.h":"Ask a person to look again","ap.label":"Why do you think this decision is wrong?","ap.hint":"Write at least 10 characters. Do not include your PAN, Aadhaar or bank account number.",
+ "ap.send":"Send appeal","ap.sent":"Appeal sent. A person will look at it.","ap.upheld":"A reviewer looked at your appeal again and kept the decision.",
+ "ap.moreinfo":"A reviewer answered your appeal and needs more information.","ap.reply":"Reviewer's answer","ap.again":"You can send another appeal with the information the reviewer asked for.",
+ "ap.err.short":"Write at least 10 characters (up to 1,500).","ap.err.id":"Please remove ID numbers (PAN, Aadhaar or bank account) from your appeal.",
+ "ap.err.open":"You already have an appeal open. A person will answer it.","ap.err.net":"We could not send your appeal. Check your connection and try again.","ap.loading":"Loading your appeal…",
+ "nt.review.approved":"A reviewer approved your application","nt.review.rejected":"A reviewer has made a decision","nt.review.more_info":"A reviewer needs more information",
+ "nt.appeal.upheld":"A reviewer answered your appeal","nt.appeal.overturned":"Your appeal was accepted","nt.appeal.more_info":"A reviewer answered your appeal and needs more information",
+ "tl.appeal_overturned":"A reviewer accepted your appeal",
+ "iss.FACE_MATCH_BORDERLINE":"selfie and PAN photo match is borderline","iss.FACE_MATCH_LOW":"selfie does not clearly match the PAN photo","iss.NAME_SPELLING_VARIANT":"name spelled differently from the PAN",
+ "iss.SURNAME_CHANGE":"surname differs from the PAN","iss.NAME_MISMATCH":"name does not match the PAN","iss.DOB_MISMATCH":"date of birth differs from the PAN",
+ "iss.ADDRESS_STATE_MISMATCH":"address state differs from the state you typed","iss.BANK_NAME_MISMATCH":"account holder name does not match","iss.BOARD_UNLISTED":"board is not on the recognised list",
+ "iss.BOARD_NOT_RECOGNISED":"board is not recognised","iss.EDU_NOT_ELIGIBLE":"a Class 10 pass is not shown","iss.IMAGE_BLURRY":"the photo is blurry","iss.IMAGE_CROPPED":"the photo is cropped",
+ "iss.REUPLOAD":"a clearer copy is needed","iss.DOC_MISSING":"the document is missing","iss.PAN_NOT_INDIVIDUAL":"not a personal PAN","iss.PAN_FORMAT_INVALID":"the PAN number format is not valid",
+ "iss.UNDERAGE":"under 18","iss.ALREADY_REGISTERED":"already registered with another insurer or intermediary","iss.IDENTITY_NOT_CONFIRMED":"identity not confirmed","iss.PAN_TYPED_CORRECTED":"typed PAN corrected from the card",
+ "iss.OTHER":"needs another look"
+},hi:{
+ "tm.left":"{time} बाकी","tm.hide":"टाइमर छिपाएँ","tm.show":"टाइमर दिखाएँ",
+ "tm.5min":"इस बैठक में 5 मिनट बचे हैं। जल्दी करने की ज़रूरत नहीं: समय पूरा होने पर आप 10 मिनट और ले सकते हैं, या सहेजकर बाद में लौट सकते हैं।",
+ "tm.up.t":"समय पूरा हुआ","tm.up.b":"10 मिनट और लें, या सहेजकर बाद में लौटें। अब तक का आपका सारा काम सुरक्षित है।",
+ "tm.more":"10 मिनट और लें","tm.more.done":"10 मिनट और जोड़ दिए गए।","tm.saved":"आपकी प्रगति सुरक्षित है। आप कभी भी लौट सकते हैं।",
+ "lp.type":"खाते का प्रकार","lp.type.applicant":"आवेदक","lp.type.reviewer":"समीक्षक",
+ "lp.type.reviewer.note":"समीक्षक खाते से आवेदन देखने से पहले किसी व्यवस्थापक की मंज़ूरी ज़रूरी है।",
+ "lp.invite":"एडमिन आमंत्रण कोड","lp.invite.hint":"केवल तभी भरें जब किसी व्यवस्थापक ने आपको कोड दिया हो। समीक्षक खाते का अनुरोध करने के लिए इसे खाली छोड़ें।",
+ "lp.reviewer.sent":"आपका समीक्षक अनुरोध भेज दिया गया है। आवेदनों की समीक्षा करने से पहले किसी व्यवस्थापक को इसे मंज़ूर करना होगा।",
+ "lp.created.admin":"आपका व्यवस्थापक खाता बन गया है। अपने ईमेल और पासवर्ड से साइन इन करें।",
+ "lp.err.invite":"यह आमंत्रण कोड सही नहीं है।","lp.err.rate":"बहुत ज़्यादा कोशिशें हुईं। कृपया कुछ देर रुककर फिर कोशिश करें।",
+ "role.reviewer_pending":"समीक्षक (मंज़ूरी की प्रतीक्षा)","nav.requests":"समीक्षक अनुरोध",
+ "wait.title":"मंज़ूरी की प्रतीक्षा","wait.body":"आपका समीक्षक अनुरोध एक व्यवस्थापक के पास है। मंज़ूरी मिलने के बाद आप आवेदनों की समीक्षा कर सकेंगे। आपको और कुछ नहीं करना है।",
+ "wait.denied.title":"आपका अनुरोध मंज़ूर नहीं हुआ","wait.denied.body":"एक व्यवस्थापक ने यह समीक्षक अनुरोध मंज़ूर नहीं किया। अगर आपको लगता है कि यह गलती है, तो अपने व्यवस्थापक से संपर्क करें।",
+ "wait.requested":"अनुरोध किया गया: {time}","wait.decided":"फ़ैसला: {time}","wait.check":"फिर से देखें","wait.as":"{email} के रूप में साइन इन",
+ "wait.checking":"जाँच हो रही है…","wait.still":"अभी भी मंज़ूरी की प्रतीक्षा है।","wait.approved":"आपका अनुरोध मंज़ूर हो गया है। समीक्षा कंसोल खुल रहा है।",
+ "rv.msg.h":"समीक्षक का संदेश","rv.more.h":"एक समीक्षक ने कुछ चीज़ें माँगी हैं","rv.more.b":"नीचे दी गई चीज़ें ठीक करें और दोबारा जाँच के लिए भेजें। इसके बाद आपका आवेदन फिर समीक्षक के पास जाएगा।",
+ "rv.item":"कृपया अपना {doc} फिर से जोड़ें: {issue}।","rv.rej.by":"हमारी टीम के एक व्यक्ति ने आपका आवेदन देखा और यह फ़ैसला लिया।",
+ "rv.cheer.ok.t":"अच्छी ख़बर: एक समीक्षक ने आपका आवेदन मंज़ूर कर दिया है।","rv.cheer.ok.b":"आपका 15 घंटे का प्रशिक्षण खुल गया है।",
+ "rv.cheer.more.t":"एक समीक्षक को आपसे कुछ चीज़ें चाहिए।","rv.cheer.more.b":"सब कुछ आपके आवेदन में एक ही जगह लिखा है।",
+ "rv.cheer.no.t":"एक समीक्षक ने फ़ैसला ले लिया है।","rv.cheer.no.b":"कारण आपके आवेदन में लिखा है। अगर आप सहमत नहीं हैं, तो अपील कर सकते हैं।",
+ "rv.sync.note":"समीक्षक आपका आवेदन तभी देख सकते हैं जब वह आपके खाते में सहेजा गया हो।","rv.sync.btn":"मेरे खाते में सहेजें",
+ "ap.h":"किसी व्यक्ति से दोबारा देखने को कहें","ap.label":"आपको यह फ़ैसला गलत क्यों लगता है?","ap.hint":"कम से कम 10 अक्षर लिखें। अपना PAN, Aadhaar या बैंक खाता नंबर न लिखें।",
+ "ap.send":"अपील भेजें","ap.sent":"अपील भेज दी गई। एक व्यक्ति इसे देखेगा।","ap.upheld":"एक समीक्षक ने आपकी अपील दोबारा देखी और फ़ैसला वही रखा।",
+ "ap.moreinfo":"एक समीक्षक ने आपकी अपील का जवाब दिया है और उन्हें और जानकारी चाहिए।","ap.reply":"समीक्षक का जवाब","ap.again":"समीक्षक ने जो जानकारी माँगी है, उसके साथ आप एक और अपील भेज सकते हैं।",
+ "ap.err.short":"कम से कम 10 अक्षर लिखें (1,500 तक)।","ap.err.id":"कृपया अपनी अपील से पहचान नंबर (PAN, Aadhaar या बैंक खाता) हटा दें।",
+ "ap.err.open":"आपकी एक अपील पहले से खुली है। एक व्यक्ति उसका जवाब देगा।","ap.err.net":"हम आपकी अपील नहीं भेज सके। कनेक्शन जाँचकर फिर कोशिश करें।","ap.loading":"आपकी अपील लोड हो रही है…",
+ "nt.review.approved":"एक समीक्षक ने आपका आवेदन मंज़ूर किया","nt.review.rejected":"एक समीक्षक ने फ़ैसला ले लिया है","nt.review.more_info":"एक समीक्षक को और जानकारी चाहिए",
+ "nt.appeal.upheld":"एक समीक्षक ने आपकी अपील का जवाब दिया","nt.appeal.overturned":"आपकी अपील स्वीकार हो गई","nt.appeal.more_info":"एक समीक्षक ने आपकी अपील का जवाब दिया है और उन्हें और जानकारी चाहिए",
+ "tl.appeal_overturned":"एक समीक्षक ने आपकी अपील स्वीकार की",
+ "iss.FACE_MATCH_BORDERLINE":"सेल्फ़ी और PAN फ़ोटो का मिलान सीमा पर है","iss.FACE_MATCH_LOW":"सेल्फ़ी PAN फ़ोटो से साफ़ मेल नहीं खाती","iss.NAME_SPELLING_VARIANT":"नाम की वर्तनी PAN से अलग है",
+ "iss.SURNAME_CHANGE":"उपनाम PAN से अलग है","iss.NAME_MISMATCH":"नाम PAN से मेल नहीं खाता","iss.DOB_MISMATCH":"जन्म तिथि PAN से अलग है",
+ "iss.ADDRESS_STATE_MISMATCH":"पते का राज्य आपके लिखे राज्य से अलग है","iss.BANK_NAME_MISMATCH":"खाताधारक का नाम मेल नहीं खाता","iss.BOARD_UNLISTED":"बोर्ड मान्य सूची में नहीं है",
+ "iss.BOARD_NOT_RECOGNISED":"बोर्ड मान्य नहीं है","iss.EDU_NOT_ELIGIBLE":"10वीं उत्तीर्ण होना नहीं दिखता","iss.IMAGE_BLURRY":"फ़ोटो धुँधली है","iss.IMAGE_CROPPED":"फ़ोटो कटी हुई है",
+ "iss.REUPLOAD":"एक साफ़ प्रति चाहिए","iss.DOC_MISSING":"दस्तावेज़ नहीं है","iss.PAN_NOT_INDIVIDUAL":"यह व्यक्तिगत PAN नहीं है","iss.PAN_FORMAT_INVALID":"PAN नंबर का प्रारूप सही नहीं है",
+ "iss.UNDERAGE":"उम्र 18 से कम","iss.ALREADY_REGISTERED":"किसी दूसरे बीमाकर्ता या मध्यस्थ के साथ पहले से पंजीकृत","iss.IDENTITY_NOT_CONFIRMED":"पहचान की पुष्टि नहीं हुई","iss.PAN_TYPED_CORRECTED":"लिखा गया PAN कार्ड से ठीक किया गया",
+ "iss.OTHER":"दोबारा देखना ज़रूरी है"
+}};
+Object.keys(I18N_RV.en).forEach(function(k){I18N.en[k]=I18N_RV.en[k]});
+Object.keys(I18N_RV.hi).forEach(function(k){I18N.hi[k]=I18N_RV.hi[k]});
 
 
 
@@ -1955,10 +2081,10 @@ function TE(k,p){ return esc(T(k,p)); }
 function setHtml(el,h){ if(el&&el.__h!==h){ el.__h=h; el.innerHTML=h; } }
 function svgi(n){ return '<svg viewBox="0 0 16 16" aria-hidden="true">'+(ICON_PATHS[n]||ICON_PATHS.circle)+'</svg>'; }
 var APPREF=null,LOCALSAVE=0,ROUTE_STAGE=null,LASTHASH="";
-var VIEWS=["welcome","dash","apply","ops","audit","eval","notif","hist","acct","help"];
-var VIEW_ACT={dash:"view.dashboard",apply:"view.application",ops:"view.review",eval:"view.evaluation",audit:"view.audit",notif:"view.notifications",hist:"view.history",acct:"view.account"};
-var VIEW_NAME={dash:"nav.home",apply:"nav.application",ops:"nav.review",audit:"nav.audit",eval:"nav.evaluation",notif:"menu.notifications",hist:"menu.history",acct:"menu.profile",help:"nav.help",welcome:"lp.signin"};
-var HASH={dash:"dashboard",apply:"apply",ops:"review",audit:"audit",eval:"evaluation",notif:"notifications",hist:"history",acct:"account",help:"help",welcome:"welcome"};
+var VIEWS=["welcome","dash","apply","ops","req","audit","eval","notif","hist","acct","help","wait"];
+var VIEW_ACT={dash:"view.dashboard",apply:"view.application",ops:"view.review",req:"admin.requests",eval:"view.evaluation",audit:"view.audit",notif:"view.notifications",hist:"view.history",acct:"view.account",wait:"view.wait"};
+var VIEW_NAME={dash:"nav.home",apply:"nav.application",ops:"nav.review",req:"nav.requests",audit:"nav.audit",eval:"nav.evaluation",notif:"menu.notifications",hist:"menu.history",acct:"menu.profile",help:"nav.help",welcome:"lp.signin",wait:"wait.title"};
+var HASH={dash:"dashboard",apply:"apply",ops:"review",req:"requests",audit:"audit",eval:"evaluation",notif:"notifications",hist:"history",acct:"account",help:"help",welcome:"welcome",wait:"waiting"};
 var HASH_STAGE={documents:1,training:3,exam:4,certificate:5};
 var GRID_ICON='<rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/>';
 var HELP_ICON='<circle cx="8" cy="8" r="5.5"/><path d="M6.4 6.4a1.7 1.7 0 1 1 2.4 1.5c-.5.3-.8.6-.8 1.2M8 11.4v.1"/>';
@@ -1971,6 +2097,7 @@ var NAV=[
  {k:"nav.certificate",v:"apply",h:"certificate",stage:"certificate",i:ICON_PATHS.award},
  {k:"nav.help",v:"help",h:"help",i:HELP_ICON},
  {k:"nav.review",v:"ops",h:"review",i:ICONS[2],staff:1},
+ {k:"nav.requests",v:"req",h:"requests",i:'<circle cx="6" cy="5.5" r="2.4"/><path d="M1.8 13.2c.5-2.4 2.2-3.6 4.2-3.6s3.7 1.2 4.2 3.6M10.5 7.8l1.6 1.6 2.8-3"/>',staff:1},
  {k:"nav.evaluation",v:"eval",h:"evaluation",i:'<path d="M2.5 13.5h11M4 11V7.5M7 11V4.5M10 11V6M13 11V3"/>',staff:1},
  {k:"nav.audit",v:"audit",h:"audit",i:'<path d="M5.5 4h8M5.5 8h8M5.5 12h8M2.4 4h.4M2.4 8h.4M2.4 12h.4"/>',staff:1}];
 function ico(p){return '<svg viewBox="0 0 16 16" aria-hidden="true">'+p+'</svg>'}
@@ -2031,11 +2158,11 @@ function shellChrome(){
     (canSee("hist")?'<button role="menuitem" type="button" data-view="hist">'+TE("menu.history")+'</button>':'')+
     '<button role="menuitem" type="button" data-act="menu-auth">'+TE(ACCOUNT?"menu.signout":"menu.signin")+'</button>');
   var ph=$("sb-ph"),sf=S.docs.SELFIE; if(ph) setHtml(ph,sf&&sf.url?'<img src="'+sf.url+'" alt="">':esc(initials()));
-  if($("sb-name")) $("sb-name").textContent=name; if($("sb-id")) $("sb-id").textContent=refText();
+  if($("sb-name")) $("sb-name").textContent=name; if($("sb-id")) $("sb-id").textContent=staffSignedIn()?T("role."+rl):refText();
   var en=$("envchip"); if(en){ setHtml(en,'<i></i>'+TE(DEMO_BUILD?"env.demo":"env.prod")); }
   var ns=$("navx-sum"); if(ns) setHtml(ns,TE("nav.more"));
-  /*DEMO:START*/var rb=$("role-box"); if(rb) rb.hidden=!DEMO_BUILD;/*DEMO:END*/
-  var rc=$("rolechip"); if(rc){ rc.hidden=!DEMO_BUILD; rc.textContent=DEMO_BUILD?T("demo.chip",{role:roleLabelFor(r==="all"?"all":r)}):""; }
+  /*DEMO:START*/var rb=$("role-box"); if(rb) rb.hidden=!DEMO_BUILD||!!ACCOUNT;/*DEMO:END*/
+  var rc=$("rolechip"); if(rc){ rc.hidden=!DEMO_BUILD||!!ACCOUNT; rc.textContent=DEMO_BUILD?T("demo.chip",{role:roleLabelFor(r==="all"?"all":r)}):""; }
   /*DEMO:START*/var s=$("role-sel"); if(s&&s.value!==ROLE) s.value=ROLE;/*DEMO:END*/
 }
 function navHtml(){
@@ -2055,7 +2182,7 @@ function flow(){
 }
 function applyLang(){
   document.documentElement.lang=LANG;
-  ["view-apply","view-ops","view-audit","view-eval","modal"].forEach(function(id){ var el=$(id); if(!el) return; if(LANG==="hi") el.setAttribute("lang","en"); else el.removeAttribute("lang"); });
+  ["view-apply","view-ops","view-req","view-audit","view-eval","modal"].forEach(function(id){ var el=$(id); if(!el) return; if(LANG==="hi") el.setAttribute("lang","en"); else el.removeAttribute("lang"); });
 }
 function setLang(l,remote){
   if(l!=="hi") l="en"; if(l===LANG&&remote!==true) return;
@@ -2116,6 +2243,8 @@ function renderWelcome(){
 /* ---- routing ---- */
 function parseHash(h){
   var v=null,stage=null;
+  /* #review/<reference> opens one case in the review console. */
+  var rm=/^review\/([A-Za-z0-9-]{4,40})$/.exec(String(h||"")); if(rm) return {v:"ops",stage:"review/"+rm[1].toUpperCase()};
   Object.keys(HASH).forEach(function(k){ if(HASH[k]===h) v=k; });
   if(!v&&h==="home") v="dash";
   if(!v&&M_has(HASH_STAGE,h)){ v="apply"; stage=h; }
@@ -2136,7 +2265,7 @@ function notifLoad(force){
   if(NOTIFS.state==="loading") return;
   if(NOTIFS.state==="ok"&&!force) return;
   if(NOTIFS.state!=="ok") NOTIFS.state="loading";
-  accountRequest("/api/notifications?limit=20").then(function(d){ NOTIFS={state:"ok",items:(d&&d.items)||[],unread:(d&&d.unread)||0}; })
+  accountRequest("/api/notifications?limit=20").then(function(d){ NOTIFS={state:"ok",items:(d&&d.items)||[],unread:(d&&d.unread)||0}; rvNotifHook(NOTIFS.items); })
    .catch(function(){ if(NOTIFS.state!=="ok") NOTIFS.state="error"; })
    .then(function(){ if(VIEW==="dash"||VIEW==="notif") render(); else shellChrome(); });
 }
@@ -2647,20 +2776,61 @@ function fixPanel(){
   }).join("");
   var demo=/*DEMO:START*/demoBox('<div class="demo-rows">'+keys.map(function(k){return '<div class="demo-row"><b>'+DOC_LABEL[k][0]+'</b>'+specCtl(k)+'</div>'}).join("")+'</div>');
 /*DEMO:ELSE*/''/*DEMO:END*/;
-  var ready=fixesReady();
-  return '<div class="panel"><div class="ophead"><div class="head"><h2>One message, everything we need</h2><p>Sent once by WhatsApp and SMS (simulated). Round '+S.fu.round+' of follow-up. Only these documents are read again; everything else carries over.</p></div>'+langSeg()+'</div>'+
-    msgBlock(it,link)+
+  var ready=fixesReady(),rv=S.fu.rv;
+  var rvBox=rv?'<div class="obs" id="rv-more"><b>'+TE("rv.msg.h")+'</b><span>'+esc(rv.message||"")+'</span></div>':'';
+  return '<div class="panel"><div class="ophead"><div class="head"><h2>'+(rv?TE("rv.more.h"):'One message, everything we need')+'</h2><p>'+(rv?TE("rv.more.b"):'Sent once by WhatsApp and SMS (simulated). Round '+S.fu.round+' of follow-up. Only these documents are read again; everything else carries over.')+'</p></div>'+langSeg()+'</div>'+
+    rvBox+(it.length?msgBlock(it,link):'')+
     '<div style="display:flex;flex-direction:column;gap:12px">'+rows+'</div>'+demo+
     '<div class="actions"><span class="small muted">'+(ready?"All fixes received.":"Replace each item above to continue.")+'</span><button class="btn pri" type="button" data-act="resubmit"'+(ready?"":" disabled")+'>Send fixes for re-check</button></div></div>';
 }
 function rejectPanel(){
-  var hi=S.lang==="hi";
-  return '<div class="panel"><div class="ophead"><div class="head"><h2>Why we cannot register you</h2><p>'+(S.touches>0?'A person on our team reviewed your application and made this decision. Every reason is listed.':'These are fixed eligibility rules, so the decision was made automatically and every reason is listed.')+'</p></div>'+langSeg()+'</div>'+
-    '<div class="msg" lang="'+(hi?"hi":"en")+'"><span class="from">PolicyNest · to '+esc(firstName())+'</span>'+S.rej.map(function(r){return esc(hi?r.hi:r.en)}).join("\n\n")+'</div>'+
-    '<div class="actions"><span class="small muted">If you think this is wrong, you can dispute it. A disputed case always goes to a person (rulebook §9).</span>'+(S.disputed?pill("info","Dispute sent"):'<button class="btn" type="button" data-act="dispute">Dispute this decision</button>')+'<button class="btn" type="button" data-act="ask-new">Start a new application</button><button class="btn" type="button" data-act="ask-delete">Delete my saved progress</button></div></div>';
+  var hi=S.lang==="hi",signed=!!(ACCOUNT&&ACCOUNT.role==="applicant"),byRv=(S.rej||[]).some(function(r){return r.code==="REVIEWER"});
+  if(signed&&APL.state==="idle") setTimeout(aplLoad,0);
+  var why=byRv?'<div class="obs"><b>'+TE("rv.msg.h")+'</b><span>'+TE("rv.rej.by")+'</span></div>':'';
+  return '<div class="panel"><div class="ophead"><div class="head"><h2>Why we cannot register you</h2><p>'+(S.touches>0||byRv?'A person on our team reviewed your application and made this decision. Every reason is listed.':'These are fixed eligibility rules, so the decision was made automatically and every reason is listed.')+'</p></div>'+langSeg()+'</div>'+why+
+    '<div class="msg" lang="'+(hi?"hi":"en")+'"><span class="from">PolicyNest · to '+esc(firstName())+'</span>'+(S.rej||[]).map(function(r){return esc(hi?r.hi:r.en)}).join("\n\n")+'</div>'+
+    (signed?'<section class="apbox" aria-labelledby="ap-h"><h3 id="ap-h">'+TE("ap.h")+'</h3>'+appealBox()+'</section>':'')+
+    '<div class="actions">'+(signed?'':'<span class="small muted">If you think this is wrong, you can dispute it. A disputed case always goes to a person (rulebook §9).</span>'+(S.disputed?pill("info","Dispute sent"):'<button class="btn" type="button" data-act="dispute">Dispute this decision</button>'))+'<button class="btn" type="button" data-act="ask-new">Start a new application</button><button class="btn" type="button" data-act="ask-delete">Delete my saved progress</button></div></div>';
 }
+/* Signed in: a dispute is a server appeal that a reviewer answers. Its outcome shows here when it arrives. */
+var APL={state:"idle",items:[],draft:""};
+function aplLatest(){ var it=(APL.items||[]).slice(); if(!it.length) return null; it.sort(function(a,b){return (b.created||0)-(a.created||0)}); return it[0]; }
+function aplLoad(){
+  if(!ACCOUNT||ACCOUNT.role!=="applicant") return;
+  if(APL.state!=="ok") APL.state="loading";
+  accountRequest("/api/appeals/me").then(function(d){ APL.items=(d&&d.appeals)||[]; APL.state="ok"; }).catch(function(){ if(APL.state!=="ok") APL.state="error"; }).then(function(){ if(VIEW==="apply") render(); });
+}
+function appealBox(){
+  var a=aplLatest();
+  if(APL.state==="loading"&&!a) return '<p class="small muted" role="status">'+TE("ap.loading")+'</p>';
+  if(a&&a.status==="OPEN") return '<div class="note" role="status" id="ap-status"><span><b>'+TE("ap.sent")+'</b></span></div>';
+  var out='';
+  if(a&&a.status!=="OVERTURNED") out+='<div class="obs" role="status" id="ap-status"><b>'+TE(a.status==="MORE_INFO"?"ap.moreinfo":"ap.upheld")+'</b><span>'+TE("ap.reply")+': '+esc(a.response||"")+'</span></div><p class="small muted">'+TE("ap.again")+'</p>';
+  return out+'<form class="apform" id="ap-form" novalidate><label for="ap-why">'+TE("ap.label")+'</label><textarea id="ap-why" maxlength="1500" aria-describedby="ap-hint">'+esc(APL.draft||"")+'</textarea><p class="small muted" id="ap-hint">'+TE("ap.hint")+'</p><p class="errsum" id="ap-err" role="alert" tabindex="-1" hidden></p><div class="actions"><button class="btn pri" type="submit" id="ap-send">'+TE("ap.send")+'</button></div></form>';
+}
+function aplSend(){
+  var ta=$("ap-why"),er=$("ap-err"),bt=$("ap-send"); if(!ta||!er) return;
+  var v=String(ta.value||"").trim();
+  function bad(k){ er.hidden=false; er.textContent=T(k); ta.setAttribute("aria-invalid","true"); ta.setAttribute("aria-describedby","ap-hint ap-err"); er.focus(); }
+  if(v.length<10||v.length>1500) return bad("ap.err.short");
+  if(/\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b/.test(v)) return bad("ap.err.id");
+  if(bt) bt.disabled=true;
+  accountRequest("/api/appeals",{explanation:v}).then(function(r){
+    APL.draft=""; S.disputed=true; log("DISPUTE_RAISED","APPLICANT","Applicant appealed the decision · sent to a reviewer (rulebook §9)");
+    APL.items=(APL.items||[]).concat([{id:r.reference,status:"OPEN",created:Math.floor(Date.now()/1000)}]); APL.state="ok";
+    render(); announce(T("ap.sent")); var st=$("ap-status"); if(st){ st.setAttribute("tabindex","-1"); try{ st.focus(); }catch(e){} }
+    aplLoad();
+  }).catch(function(e){
+    if(bt) bt.disabled=false;
+    var c=String(e&&e.message||""); bad(c==="id_number"?"ap.err.id":c==="invalid_explanation"?"ap.err.short":c==="appeal_open"?"ap.err.open":"ap.err.net");
+    if(c==="appeal_open") aplLoad();
+  });
+}
+document.addEventListener("submit",function(e){ if(e.target&&e.target.id==="ap-form"){ e.preventDefault(); aplSend(); } });
+document.addEventListener("input",function(e){ if(e.target&&e.target.id==="ap-why") APL.draft=e.target.value; });
 function humanPanel(){
-  return '<div class="panel"><div class="head"><h2>A person on our team is checking '+(S.disputed?"your dispute":"a few details")+'</h2><p>Some decisions are always made by a person, not by the system. Nothing is needed from you right now. We aim to reply within 4 working hours (our service target)., by WhatsApp and SMS.</p></div>'+
+  var syncHint=(ACCOUNT&&ACCOUNT.role==="applicant"&&!CONS.sync)?'<div class="note" role="status"><span>'+TE("rv.sync.note")+'</span><button class="btn sm" type="button" data-act="rv-sync-on">'+TE("rv.sync.btn")+'</button></div>':'';
+  return '<div class="panel"><div class="head"><h2>A person on our team is checking '+(S.disputed?"your dispute":"a few details")+'</h2><p>Some decisions are always made by a person, not by the system. Nothing is needed from you right now. We aim to reply within 4 working hours (our service target)., by WhatsApp and SMS.</p></div>'+syncHint+
    ''+/*DEMO:START*/(canSee("ops")?'<div class="note"><span><b>Demo:</b> play the reviewer in the Review console.</span><button class="btn sm" type="button" data-act="go-review">Open review console →</button></div>':'')/*DEMO:ELSE*/''/*DEMO:END*/+'</div>';
 }
 function stepVerify(){
@@ -2743,8 +2913,10 @@ function stepCert(){
 }
 function render(){
   flow();
-  if(!canSee(VIEW)) renderBlocked(VIEW);
+  if(!canSee(VIEW)&&VIEW!=="wait") renderBlocked(VIEW);
   else if(VIEW==="welcome") renderWelcome();
+  else if(VIEW==="wait") renderWait();
+  else if(VIEW==="req") renderReq();
   else if(VIEW==="dash") renderDash();
   else if(VIEW==="apply") $("view-apply").innerHTML=routeNote()+reenterNote()+remoteDocsNote()+(!S.begun?stepIntro():S.step<2&&!S.focus?stepResume():stepper()+[stepDetails,stepDocs,stepVerify,stepTraining,stepExam,stepCert][S.step]());
   else if(VIEW==="ops") renderOps();
@@ -3014,6 +3186,8 @@ function recheck(){
     if(!touched&&old&&old.res===c.res&&old.ev===c.ev){c.carried=true;c.from=old.from||S.round-1}
   });
   S.ex=x; S.checks=r.checks; S.decision=r.decision; S.decision=decisionOf(r.checks); faceRepeatRule(changed.indexOf("SELFIE")>=0); S.obs=observe(r.checks,x); S.shown=0;
+  /* A person asked for these fixes, so a person confirms them: a clean re-check goes back to the reviewer instead of approving by itself. */
+  if(S.rvOpen&&(S.decision==="APPROVE"||S.decision==="HUMAN_REVIEW")){ S.decision="HUMAN_REVIEW"; log("RECHECK_TO_REVIEWER","SYSTEM","Round "+S.round+" · fixes asked for by a reviewer go back to the reviewer"); }
   var re=r.checks.filter(function(c){return !c.carried}).length;
   log("RECHECK","SYSTEM","Round "+S.round+" · "+re+" checks re-run, "+(r.checks.length-re)+" carried over unchanged");
   render(); try{window.scrollTo(0,0)}catch(e){}
@@ -3028,7 +3202,7 @@ document.addEventListener("input",function(e){
 document.addEventListener("toggle",function(e){ var t=e.target; if(t&&t.classList&&t.classList.contains("demo")) S.demoOpen=t.open; else if(t&&t.classList&&t.classList.contains("rules-applied")) RULES_OPEN=t.open; },true);
 document.addEventListener("change",function(e){
   var t=e.target;
-  if(t.getAttribute("data-up")){ PICKING=false; if(t.files&&t.files[0]) addDoc(t.getAttribute("data-up"),t.files[0]); }
+  if(t.getAttribute("data-up")){ pickEnd(); if(t.files&&t.files[0]) addDoc(t.getAttribute("data-up"),t.files[0]); }
   else if(t.getAttribute("data-specv")){ S.specv[t.getAttribute("data-specv")]=t.value; }
   else if(t.getAttribute("data-scn")!==null){ S.scnPick=t.value; }
   else if(t.getAttribute("data-rvask")){ S.review.ask[t.getAttribute("data-rvask")]=t.checked; }
@@ -3067,6 +3241,7 @@ document.addEventListener("click",function(e){
   else if(a==="resume"){ startSitting(true); }
   else if(a==="forget"){ forgetSaved(); }
   else if(a==="fb-exit"){ askExit(); }
+  else if(a==="fb-timer"){ setPref("hideTimer",!(S.sessPref&&S.sessPref.hideTimer)); timerDraw(); }
   else if(a==="cp-open"){ cpOpen(true); }
   else if(a==="cp-close"){ cpOpen(false); }
   else if(a.indexOf("m-")===0){ modalAct(a); }
@@ -3078,6 +3253,10 @@ document.addEventListener("click",function(e){
   else if(a==="theme"){ THEME=THEME==="dark"?"light":"dark"; try{localStorage.setItem("pn-theme",THEME)}catch(e){} applyTheme(); }
   else if(a==="dispute"){ S.disputed=true; S.decision="HUMAN_REVIEW"; setState("HUMAN_REVIEW"); log("DISPUTE_RAISED","APPLICANT","Applicant disputed the rejection · routed to a reviewer (rulebook §9, Human only)"); openReview(true); render(); }
   else if(a==="rv-approve"||a==="rv-ask"||a==="rv-reject"||a==="rv-uphold") reviewerAct(a);
+  else if(a==="rv-sync-on"){ CONS.sync=true; consSave(); lastSynced=''; syncEnable(); render(); }
+  else if(a==="wait-check"){ waitCheck(); }
+  else if(a==="wait-out"){ signOut(); }
+  else if(rvClick(t,a)){ }
   else if(a==="start-training"){ setState("TRAINING_IN_PROGRESS"); log("LMS_LOGIN","APPLICANT","Training modules unlocked"); go(3); }
   else if(a==="start-exam"){ setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Attempt started"); go(4); }
   else if(a==="retry"){ S.exam={ans:{},score:null}; setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Re-attempt (24-hour cooldown waived)"); render(); }
@@ -3201,7 +3380,9 @@ function reviewCard(){
    '<p class="small muted">The applicant never sees the words "fraud" or another person\'s data. A confirmed different-person rejection is referred to the fraud desk internally.</p></div>';
 }
 function renderOps(){
-  if(staffSignedIn()){ $("view-ops").innerHTML='<div class="card"><h1>Review console</h1><div class="empty">No case selected. Cases assigned to you will appear here once the review queue screens are built.</div></div>'; return; }
+  if(staffSignedIn()){ renderConsole(); return; }
+  /* Below: the single-application reviewer task on this device (no staff account signed in; the demo build uses it for T4 and T8). */
+  var vo=$("view-ops"); if(vo.querySelector(".rvc")) vo.innerHTML="";
   var x=S.ex,sub=S.reached.SUBMITTED,done=sub&&!S.rechecking&&S.shown>=S.checks.length;
   var dec=!sub?pill("","Awaiting documents"):!done?pill("run","Engine running"):S.decision==="APPROVE"?pill("ok","APPROVE · straight-through"):pill(S.decision==="REJECT"?"bad":"info",S.decision);
   var h='<div class="card"><div class="ophead"><div><h1>'+esc(S.f.name||"New applicant")+'</h1><span class="mono muted">'+S.appId+' · Web · '+esc(S.f.city||"—")+', '+esc(S.f.state||"—")+'</span></div>'+dec+'</div>'+
@@ -3252,56 +3433,105 @@ function stepResume(){
   '<div class="stats"><div class="stat"><b>'+S.sittings+'</b><span>Sittings so far</span></div><div class="stat"><b>'+n+' / 6</b><span>Documents verified</span></div></div>'+
   '<div class="actions"><button class="btn" type="button" data-act="forget">Delete my saved progress</button><button class="btn pri" type="button" data-act="resume">'+TE("intro.resume")+'</button></div></div>';
 }
-/* ---------- Onboarding sitting: no countdown, no expiry, no leave-screen warning. A sitting is only a log of when the applicant worked. ---------- */
-var tickT=null,PICKING=false,MODAL=null;
+/* ---------- Onboarding sitting: a visible, gentle 30-minute timer (user decision, 16 Nov). At zero a dialog offers 10 more minutes or Save and exit.
+   Progress is never wiped and nothing restarts; there is no full screen and no leave-screen warning. The timer can be hidden, it does not run while
+   the file picker is open, and it stops when the documents are submitted. S.sess holds {start,n,ext,paused,pickAt,w5,due}; persist() keeps it, and a
+   tab-scoped sessionStorage copy (timestamps only, no personal data) keeps it across a reload when nothing is saved on the device. ---------- */
+var tickT=null,PICKING=false,MODAL=null,SIT_MIN=30,SIT_EXT=10,SIT_KEY="pn-sitting";
+function sitEnd(s){ return s.start+(SIT_MIN+(s.ext||0)*SIT_EXT)*60000+(s.paused||0)+(s.pickAt?Math.max(0,Date.now()-s.pickAt):0); }
+function sitLeft(s){ return s&&typeof s.start==="number"?sitEnd(s)-Date.now():0; }
+function sitId(){ return String(APPREF||S.appId||""); }
+function sitStore(){ try{ if(S.sess) sessionStorage.setItem(SIT_KEY,JSON.stringify({id:sitId(),start:S.sess.start,n:S.sess.n,ext:S.sess.ext||0,paused:S.sess.paused||0,w5:S.sess.w5||0,due:S.sess.due||0})); else sessionStorage.removeItem(SIT_KEY); }catch(e){} }
+function sitLoad(){ try{ var o=JSON.parse(sessionStorage.getItem(SIT_KEY)||"null"); if(o&&o.id===sitId()&&typeof o.start==="number") return {start:o.start,n:o.n|0,ext:o.ext|0,paused:Number(o.paused)||0,pickAt:0,w5:o.w5?1:0,due:o.due?1:0}; }catch(e){} return null; }
+function tickStart(){ if(!tickT) tickT=setInterval(tick,1000); tick(); }
+function tickStop(){ if(tickT){ clearInterval(tickT); tickT=null; } }
+function timerOn(){ return !!(S.sess&&S.focus&&VIEW==="apply"&&S.step<2); }
+function timerDraw(){
+  var el=$("fb-timer"),bt=$("fb-tt"); if(!el||!bt) return;
+  var on=timerOn(),hide=!!(S.sessPref&&S.sessPref.hideTimer);
+  bt.hidden=!on; el.hidden=!on||hide;
+  var bl=T(hide?"tm.show":"tm.hide"); if(bt.textContent!==bl) bt.textContent=bl;
+  if(!on) return;
+  var left=Math.max(0,sitLeft(S.sess)),txt=T("tm.left",{time:mmss(left)});
+  if(el.textContent!==txt) el.textContent=txt;
+  el.classList.toggle("low",left<=300000);
+}
+function tick(){
+  var s=S.sess; if(!s){ tickStop(); timerDraw(); return; }
+  timerDraw();
+  if(!timerOn()||PICKING||s.pickAt) return;
+  var left=sitLeft(s);
+  if(left<=300000&&left>0&&!s.w5){ s.w5=1; sitStore(); persist(true); announce(T("tm.5min")); }
+  if(left<=0&&!s.due&&!modalOpen()){ s.due=1; sitStore(); persist(true); log("SITTING_TIME_UP","APPLICANT","Sitting "+s.n+" · 30-minute timer reached zero · nothing reset"); showModal(T("tm.up.t"),T("tm.up.b"),[[T("tm.more"),"m-more",1],[T("fb.exit"),"m-later"]],"m-more"); }
+}
+/* The file picker or camera is open: the timer waits (its time is added back when the picker closes). */
+function pickStart(){ PICKING=true; if(S.sess&&!S.sess.pickAt) S.sess.pickAt=Date.now(); }
+function pickEnd(){ PICKING=false; if(S.sess&&S.sess.pickAt){ S.sess.paused=(S.sess.paused||0)+Math.max(0,Date.now()-S.sess.pickAt); S.sess.pickAt=0; sitStore(); } }
+document.addEventListener("click",function(e){ var i=e.target&&e.target.closest?e.target.closest('input[type="file"][data-up],label[for^="up-"]'):null; if(i) pickStart(); },true);
+document.addEventListener("cancel",function(e){ var t=e.target; if(t&&t.tagName==="INPUT"&&t.type==="file") pickEnd(); },true);
+window.addEventListener("focus",function(){ if(PICKING) setTimeout(function(){ if(PICKING) pickEnd(); },1000); });
+function sitExtend(){
+  var s=S.sess; if(!s) return;
+  var left=sitLeft(s); if(left<0) s.paused=(s.paused||0)-left; /* a late answer still gets the full 10 minutes */
+  s.ext=(s.ext||0)+1; s.due=0; sitStore(); persist(true);
+  log("SITTING_EXTENDED","APPLICANT","Sitting "+s.n+" · 10 more minutes");
+  announce(T("tm.more.done")); timerDraw();
+}
 function beginOnboarding(){
   var c=$("f-save"); S.saveOK=!!(c&&c.checked); S.begun=true;
   log("ONBOARDING_OPENED","APPLICANT","First-visit checklist read · save on this device: "+(S.saveOK?"yes (consent)":"no"));
   startSitting(false);
 }
 function startSitting(resumed){
-  S.sittings++; S.sess={start:Date.now(),n:S.sittings};
-  log(resumed?"SITTING_RESUMED":"SITTING_START","APPLICANT","Sitting "+S.sittings+" · "+(S.step===0?"details page "+(S.dpage+1):accepted()+" of 6 documents in"));
-  S.restored=false; enterFocus(); render();
+  /* A sitting that still has time left (same tab, a reload, or a return from another view) carries on with the same timer. */
+  var prev=(S.sess&&sitLeft(S.sess)>0)?S.sess:null; if(!prev){ var ss=sitLoad(); if(ss&&sitLeft(ss)>0) prev=ss; }
+  if(prev){ S.sess=prev; S.sess.pickAt=0; log("SITTING_RESUMED","APPLICANT","Sitting "+prev.n+" continued · "+mmss(sitLeft(prev))+" left"); }
+  else { S.sittings++; S.sess={start:Date.now(),n:S.sittings,ext:0,paused:0,pickAt:0,w5:0,due:0};
+    log(resumed?"SITTING_RESUMED":"SITTING_START","APPLICANT","Sitting "+S.sittings+" · "+(S.step===0?"details page "+(S.dpage+1):accepted()+" of 6 documents in")+" · 30-minute timer"); }
+  S.restored=false; enterFocus(); sitStore(); render(); tickStart();
   cpNudge("start-"+S.sittings,(resumed?"Welcome back. ":"Hi, I'm your onboarding Copilot. ")+nextStepText());
 }
 function mmss(ms){ms=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(ms/60)).padStart(2,"0")+":"+String(ms%60).padStart(2,"0")}
 function modalOpen(){ var d=$("modal"); return !!(d&&d.open) }
 function setPref(k,v){ S.sessPref=Object.assign({},S.sessPref); S.sessPref[k]=v; persist(); }
 function isTouch(){ try{ return !!(window.matchMedia&&window.matchMedia("(pointer: coarse)").matches) }catch(e){ return false } }
-function endSitting(ev,note){ if(!S.sess) return; var used=Date.now()-S.sess.start; log(ev,"APPLICANT","Sitting "+S.sess.n+" · "+note+" · "+mmss(used)+" used"); S.sess=null; }
+function endSitting(ev,note){ if(!S.sess) return; var used=Date.now()-S.sess.start; log(ev,"APPLICANT","Sitting "+S.sess.n+" · "+note+" · "+mmss(used)+" used"); S.sess=null; sitStore(); tickStop(); timerDraw(); }
 function enterFocus(){ S.focus=true; document.body.classList.add("focus"); }
 function leaveFocus(){ S.focus=false; dismissModals(); document.body.classList.remove("focus"); }
 function focusUI(){
-  var on=S.focus&&VIEW==="apply"; if(!on&&S.focus&&VIEW!=="apply") { /* navigating away ends focus */ endSitting("SITTING_PAUSED","Left the application view"); leaveFocus(); }
+  var on=S.focus&&VIEW==="apply"; if(!on&&S.focus&&VIEW!=="apply") { /* navigating away pauses the sitting; its timer is kept and carries on when the applicant resumes */ if(S.sess) log("SITTING_PAUSED","APPLICANT","Sitting "+S.sess.n+" · left the application view · "+mmss(Math.max(0,sitLeft(S.sess)))+" left"); leaveFocus(); }
   document.body.classList.toggle("focus",S.focus&&VIEW==="apply");
   var fb=$("focusbar"); if(fb) fb.hidden=!(S.focus&&VIEW==="apply");
   var st=$("fb-step"); if(st) st.textContent=S.step===0?"Your details · page "+(S.dpage+1)+" of "+DPAGES.length:S.step===1?"Documents · "+accepted()+" of 6 verified":STEPS[S.step];
   if(S.focus&&S.step>=2&&!S.sess){ leaveFocus(); var b=$("focusbar"); if(b) b.hidden=true; }
+  if(S.sess&&S.step>=2) endSitting("SITTING_COMPLETE","Moved past the documents step");
+  if(timerOn()) tickStart(); else timerDraw();
 }
 function askExit(){ showModal(T("exit.t"),T(S.saveOK?"exit.b.saved":"exit.b.unsaved"),[[T("fb.exit"),"m-later",1],[T("exit.stay"),"m-close"]]); }
 /* Native <dialog>: showModal() traps focus. Escape fires "cancel", which means keep working (the sitting carries on). */
 /* A dialog that is already open is never replaced: the new one waits in DQ and opens when the current one closes. */
 var DQ=[];
-function showModal(title,body,btns){
-  if(modalOpen()){ DQ.push([title,body,btns]); return; }
+function showModal(title,body,btns,cancelAct){
+  if(modalOpen()){ DQ.push([title,body,btns,cancelAct]); return; }
   var d=$("modal");
-  MODAL={prev:document.activeElement}; $("m-t").textContent=title; $("m-b").textContent=body;
+  MODAL={prev:document.activeElement,cancel:cancelAct||null}; $("m-t").textContent=title; $("m-b").textContent=body;
   $("m-a").innerHTML=btns.map(function(b){return '<button class="btn'+(b[2]?" pri":"")+'" type="button" data-act="'+b[1]+'">'+esc(b[0])+'</button>'}).join("");
   try{ if(typeof d.showModal==="function") d.showModal(); else d.setAttribute("open",""); }catch(e){ MODAL=null; return; }
   markHi(); var f=$("m-a").querySelector("button"); if(f) f.focus();
 }
 function closeModal(){
   var d=$("modal"), p=MODAL&&MODAL.prev; MODAL=null; dlgClose(d); if(p&&p.focus) try{p.focus()}catch(e){}
-  if(DQ.length){ if(S.sess&&S.focus){ var n=DQ.shift(); setTimeout(function(){ if(S.sess&&S.focus) showModal(n[0],n[1],n[2]); },0); } else DQ.length=0; }
+  if(DQ.length){ if(S.sess&&S.focus){ var n=DQ.shift(); setTimeout(function(){ if(S.sess&&S.focus) showModal(n[0],n[1],n[2],n[3]); },0); } else DQ.length=0; }
 }
 /* Clears the queue and any open dialog. Called when the applicant leaves the focused screen, so no stale dialog comes back. */
 function dismissModals(){ DQ.length=0; MODAL=null; dlgClose($("modal")); }
 function dlgClose(d){ if(!d||!d.open) return; if(typeof d.close==="function") d.close(); else d.removeAttribute("open"); }
-$("modal").addEventListener("cancel",function(e){ e.preventDefault(); closeModal(); });
+/* Escape on a dialog runs its cancel action when it has one (the time's-up dialog: take 10 more minutes), otherwise it just closes. */
+$("modal").addEventListener("cancel",function(e){ e.preventDefault(); var c=MODAL&&MODAL.cancel; if(c) modalAct(c); else closeModal(); });
 function modalAct(a){
   closeModal();
-  if(a==="m-later"){ endSitting("SITTING_SAVED","Applicant chose to continue later"); leaveFocus(); render(); }
+  if(a==="m-more"){ sitExtend(); }
+  else if(a==="m-later"){ endSitting("SITTING_SAVED","Applicant chose to continue later"); leaveFocus(); persist(true); if(syncOn()) syncFlush(); show(canSee("dash")?"dash":roleOf().first); focusHead(VIEW); announce(T("tm.saved")); }
   else if(a==="m-newapp"){ newApplication(); }
   else if(a==="m-sync-yes"){ syncAccept(); }
   else if(a==="m-sync-no"){ syncDecline(); }
@@ -3336,7 +3566,9 @@ function restore(){
   var raw=null; LOCALAT=0; try{ raw=localStorage.getItem(SAVEKEY) }catch(e){} if(!raw) return false;
   try{ var o=JSON.parse(raw),days=(Date.now()-o.savedAt)/864e5,lim=o.S.status==="NEEDS_MORE_INFO"?14:30;
     if(days>lim){ try{localStorage.removeItem(SAVEKEY)}catch(e){} DROPPED=true; return false; } /* state machine: INACTIVITY_TIMEOUT → DROPPED_OUT */
-    LOCALAT=o.savedAt||0; S=o.S; S.focus=false; S.sess=null; S.rechecking=false; S.restored=true; if(S.review&&!S.review.rec) S.review.rec=recText(S.review.dispute); if(S.checks&&S.ex) S.obs=observe(S.checks,S.ex); S.fb=S.fb||{};
+    LOCALAT=o.savedAt||0; S=o.S; S.focus=false; S.rechecking=false; S.restored=true;
+    /* A sitting with time left survives the reload: the applicant lands back in it with the same timer. */
+    if(S.sess&&typeof S.sess.start==="number"&&S.step<2&&S.begun){ if(S.sess.pickAt){ S.sess.paused=(S.sess.paused||0)+Math.max(0,Date.now()-S.sess.pickAt); S.sess.pickAt=0; } if(sitLeft(S.sess)>0){ S.focus=true; S.restored=false; } else S.sess=null; } else S.sess=null; if(S.review&&!S.review.rec) S.review.rec=recText(S.review.dispute); if(S.checks&&S.ex) S.obs=observe(S.checks,S.ex); S.fb=S.fb||{};
     /* Saves from before the reviewer-note fix can hold internal events, reviewer notes and reviewer wording. Strip them on load. */
     S.events=(S.events||[]).filter(function(e){return e.audience!=="internal"&&!INTERNAL_EVENTS[e.event]}).map(function(e){ if(e.event==="ROUTED_TO_REVIEWER"&&e.note) e.note=e.note.replace(/ · AI recommendation: .*? · evidence/," · evidence"); return e; });
     var scrubEv=function(s){ return typeof s==="string"?s.replace(/ · confirmed by reviewer(: .*)?$/," · confirmed by a reviewer").replace(/ · rejected by reviewer(: .*)?$/," · rejected by a reviewer").replace(/ · reviewer asked the applicant: .*$/," · reviewer asked the applicant"):s; };
@@ -3483,19 +3715,26 @@ var ROLES=[
   {k:"reviewer",label:"Reviewer",first:"ops"},
   {k:"ops",label:"Ops and compliance",first:"eval"},
   {k:"admin",label:"Administrator",first:"ops"},
+  {k:"reviewer_pending",label:"Reviewer (awaiting approval)",first:"wait"},
   /*DEMO:START*/{k:"all",label:"All views (demo)",first:"dash"}/*DEMO:END*/
 ];
-var ROLE=(function(){ if(!DEMO_BUILD) return "applicant"; var v=null; try{ v=localStorage.getItem("pn-role") }catch(e){} if(v&&roleOf(v)) return v; return DEMO?"all":"applicant" })();
+var ROLE=(function(){ if(!DEMO_BUILD) return "applicant"; var v=null; try{ v=localStorage.getItem("pn-role") }catch(e){} if(v&&roleOf(v)&&v!=="reviewer_pending") return v; return DEMO?"all":"applicant" })();
+var LOCAL_ROLE=ROLE;
 function roleOf(k){ var key=(k===undefined)?ROLE:k; for(var i=0;i<ROLES.length;i++) if(ROLES[i].k===key) return ROLES[i]; return null }
-function canSee(v){ if(v==="help"||v==="welcome") return true; if(DEMO_BUILD&&ROLE==="all") return true; return can(ROLE,VIEW_ACT[v]); }
-function rolesFor(v){ return ROLES.filter(function(r){return r.k!=="all"&&can(r.k,VIEW_ACT[v])}) }
+function canSee(v){ if(v==="help"||v==="welcome") return ROLE!=="reviewer_pending"||v==="help"; if(v==="wait") return ROLE==="reviewer_pending"; if(DEMO_BUILD&&ROLE==="all") return v!=="req"; return can(ROLE,VIEW_ACT[v]); }
+function rolesFor(v){ return ROLES.filter(function(r){return r.k!=="all"&&r.k!=="reviewer_pending"&&can(r.k,VIEW_ACT[v])}) }
 function rvRoleNote(){ var r=roleOf(); return (/*DEMO:START*/DEMO_BUILD?" · demo role: ":/*DEMO:END*/" · role: ")+(r?r.label:"not set") }
-/* Production: the role follows the server account (applicant when signed out). */
-function syncRole(){ if(DEMO_BUILD) return; var r=ACCOUNT&&roleOf(ACCOUNT.role)&&ACCOUNT.role!=="all"?ACCOUNT.role:"applicant"; ROLE=r; }
+/* The role follows the server account (applicant when signed out). In the demo build a signed-in account also sets the role;
+   signed out, the local role switch applies. */
+function syncRole(){
+  var acc=ACCOUNT&&ACCOUNT.role&&ACCOUNT.role!=="all"&&roleOf(ACCOUNT.role)?ACCOUNT.role:null;
+  if(DEMO_BUILD){ ROLE=acc||LOCAL_ROLE; return; }
+  ROLE=acc||"applicant";
+}
 function setRole(k,goto){
-  if(!DEMO_BUILD) return;
-  var r=roleOf(k); if(!r) return;
-  ROLE=k; try{ localStorage.setItem("pn-role",k) }catch(e){}
+  if(!DEMO_BUILD||ACCOUNT) return;
+  var r=roleOf(k); if(!r||k==="reviewer_pending") return;
+  ROLE=k; LOCAL_ROLE=k; try{ localStorage.setItem("pn-role",k) }catch(e){}
   announce("Viewing as "+r.label);
   if(goto&&canSee(goto)){ show(goto); focusHead(goto); return }
   if(!canSee(VIEW)) return show(r.first);
@@ -3515,22 +3754,28 @@ function renderBlocked(v){
 /*DEMO:START*/var RSEL=$("role-sel"); if(RSEL) RSEL.addEventListener("change",function(){ setRole(this.value) });/*DEMO:END*/
 function show(v,h){
   /* Signed-in visitors never see the landing page; in the production build signed-out visitors see nothing but the landing page. */
+  /* A reviewer request waiting for approval sees only the waiting page; nobody else sees it. */
+  if(ACCOUNT&&ACCOUNT.role==="reviewer_pending"){ if(v!=="wait"){ v="wait"; h=undefined; } }
+  else if(v==="wait"){ v=ACCOUNT?roleOf().first:"welcome"; h=undefined; }
   if(v==="welcome"&&ACCOUNT){ v=roleOf().first; h=undefined; }
   else if(v!=="welcome"&&!ACCOUNT&&!DEMO_BUILD){ v="welcome"; h=undefined; }
-  document.body.classList.toggle("landing",v==="welcome");
+  document.body.classList.toggle("landing",v==="welcome"||v==="wait");
   stopSpeech();
   VIEW=v; ROUTE_STAGE=(v==="apply"&&h&&M_has(HASH_STAGE,h))?h:null;
-  VIEWS.forEach(function(k){var el=$("view-"+k); if(el) el.hidden=k!==v});
+  VIEWS.forEach(function(k){var el=$("view-"+k); if(el) el.hidden=!(k===v||(k==="welcome"&&v==="wait"))});
   closeMenu(false); navClose(false);
   if(ACCOUNT&&(v==="dash"||v==="notif")) notifLoad(true);
   if(ACCOUNT&&v==="hist") histLoad();
+  if(v==="ops"){ var nsel=(h&&String(h).indexOf("review/")===0)?String(h).slice(7):null; if(nsel!==RV.sel){ RV.sel=nsel; RV.det={state:"idle",ref:nsel,data:null,err:""}; } rvOnShow(); }
+  if(v==="req") reqLoad();
+  if(v==="wait") waitLoad();
   render();
   var hh=h||HASH[v]; LASTHASH=hh;
   try{ if(location.hash!=="#"+hh) location.hash=hh; window.scrollTo(0,0) }catch(e){}
   if(!canSee(v)){ focusHead(v); announce(T("un.title",{name:T(VIEW_NAME[v]||"nav.home")})) }
 }
 window.addEventListener("hashchange",function(){
-  var h=location.hash.slice(1); if(h===LASTHASH) return;
+  var h=location.hash.slice(1); if(h===LASTHASH||h.indexOf("reset=")===0) return;
   var p=parseHash(h); if(!p.v) return;
   show(p.v,p.stage||undefined); focusHead(p.v);
 });
@@ -3544,32 +3789,37 @@ function consSave(){ var k=consKey(); if(!k) return; try{ localStorage.setItem(k
 accountDialog.className='pdlg';
 accountDialog.setAttribute('aria-labelledby','account-heading');
 document.body.appendChild(accountDialog);
-var AUTH={mode:'login',as:'applicant',notice:'',syncAfter:false};
-/* One dialog, three modes (sign in, create account, account recovery), opened only from the landing page. Fields and errors are labelled; the error summary takes focus. */
-function authDraw(keepEmail){
-  var m=AUTH.mode,em=keepEmail&&$('account-email')?$('account-email').value:'';
+var AUTH={mode:'login',as:'applicant',type:'applicant',notice:'',syncAfter:false};
+/* One dialog, three modes (sign in, create account, account recovery), opened only from the landing page. Fields and errors are labelled; the error summary takes focus.
+   Create account offers Applicant or Reviewer. A reviewer account is only a request until an administrator approves it; an admin invite code creates an administrator. */
+function authDraw(keep){
+  var m=AUTH.mode,em=keep&&$('account-email')?$('account-email').value:'',nm=keep&&$('account-name')?$('account-name').value:'',pw=keep&&$('account-password')?$('account-password').value:'',iv=keep&&$('account-invite')?$('account-invite').value:'';
+  var rev=m==='register'&&AUTH.type==='reviewer';
   var h='<form class="mbox" id="account-form" novalidate><h2 id="account-heading">'+TE('lp.dlg.'+m)+'</h2><p class="small">'+TE('lp.dlg.'+m+'.sub')+'</p>'+
     '<div class="errsum" id="account-errors" role="alert" tabindex="-1" hidden></div>';
   if(m==='login') h+='<fieldset class="asrole"><legend class="small">'+TE('lp.as')+'</legend><div class="seg">'+['applicant','reviewer'].map(function(r){ return '<button type="button" data-auth-as="'+r+'" aria-pressed="'+(AUTH.as===r)+'">'+TE('lp.as.'+r)+'</button>'; }).join('')+'</div></fieldset>';
-  if(m==='register') h+='<label for="account-name">'+TE('lp.f.name')+'</label><input id="account-name" type="text" autocomplete="name" maxlength="80" required>';
+  if(m==='register') h+='<fieldset class="asrole"><legend class="small">'+TE('lp.type')+'</legend><div class="seg">'+['applicant','reviewer'].map(function(r){ return '<button type="button" data-auth-type="'+r+'" aria-pressed="'+(AUTH.type===r)+'">'+TE('lp.type.'+r)+'</button>'; }).join('')+'</div></fieldset>'+
+    (rev?'<p class="small muted" id="account-type-note">'+TE('lp.type.reviewer.note')+'</p>':'')+
+    '<label for="account-name">'+TE('lp.f.name')+'</label><input id="account-name" type="text" autocomplete="name" maxlength="80" value="'+esc(nm)+'" required>';
   h+='<label for="account-email">'+TE('lp.f.email')+'</label><input id="account-email" type="email" autocomplete="'+(m==='register'?'email':'username')+'" maxlength="254" value="'+esc(em)+'" required>';
   if(m!=='recover') h+='<label for="account-password">'+TE(m==='register'?'lp.f.password.new':'lp.f.password')+'</label><input id="account-password" type="password" autocomplete="'+(m==='login'?'current-password':'new-password')+'" maxlength="256" required>';
-  if(m==='register') h+='<label class="optin" for="account-sync-opt"><input id="account-sync-opt" type="checkbox"><span>'+TE('lp.sync.opt')+'</span></label>';
+  if(rev) h+='<details class="invite"'+(iv?' open':'')+'><summary>'+TE('lp.invite')+'</summary><label for="account-invite">'+TE('lp.invite')+'</label><input id="account-invite" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="128" aria-describedby="account-invite-hint" value="'+esc(iv)+'"><p class="hint" id="account-invite-hint">'+TE('lp.invite.hint')+'</p></details>';
+  else if(m==='register') h+='<label class="optin" for="account-sync-opt"><input id="account-sync-opt" type="checkbox"><span>'+TE('lp.sync.opt')+'</span></label>';
   h+='<p class="okmsg" id="account-message" role="status" hidden></p>'+
     '<div class="actions"><button class="btn pri" type="submit" id="account-submit">'+TE(m==='login'?'lp.signin':m==='register'?'lp.create':'lp.submit.recover')+'</button><button class="btn" type="button" id="account-close">'+TE('lp.close')+'</button></div>'+
     '<div class="actions" style="justify-content:flex-start">'+(m!=='login'?'<button class="linkbtn" type="button" data-auth-mode="login">'+TE('lp.sw.login')+'</button>':'<button class="linkbtn" type="button" data-auth-mode="register">'+TE('lp.sw.register')+'</button><button class="linkbtn" type="button" data-auth-mode="recover">'+TE('lp.sw.recover')+'</button>')+'</div></form>';
   accountDialog.innerHTML=h;
-  if(m==='login'&&AUTH.as==='reviewer'){ var rg=accountDialog.querySelector('[data-auth-mode="register"]'); if(rg){ var nt=document.createElement('span'); nt.className='small muted'; nt.textContent=T('lp.as.reviewer.note'); rg.replaceWith(nt); } }
+  var pf=$('account-password'); if(pf&&pw) pf.value=pw;
   if(m==='login'&&AUTH.notice){ var om=$('account-message'); if(om){ om.hidden=false; om.textContent=T(AUTH.notice); } }
 }
 function openAuth(mode){
-  AUTH.mode=(mode==='register'||mode==='recover')?mode:'login'; AUTH.notice=''; authDraw(false);
+  AUTH.mode=(mode==='register'||mode==='recover')?mode:'login'; AUTH.notice=''; AUTH.type='applicant'; authDraw(false);
   if(!accountDialog.open) accountDialog.showModal();
   var f=$(AUTH.mode==='register'?'account-name':'account-email'); if(f) f.focus();
 }
 function authErrors(list){
   var box=$('account-errors'); if(!box) return;
-  ['account-name','account-email','account-password'].forEach(function(id){ var el=$(id); if(el){ el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); } });
+  ['account-name','account-email','account-password','account-invite'].forEach(function(id){ var el=$(id); if(el){ el.removeAttribute('aria-invalid'); if(id==='account-invite') el.setAttribute('aria-describedby','account-invite-hint'); else el.removeAttribute('aria-describedby'); } });
   if(!list.length){ box.hidden=true; box.innerHTML=''; return; }
   box.innerHTML=TE('lp.err.sum')+'<ul>'+list.map(function(x){ return '<li>'+(x[0]?'<a href="#'+x[0]+'" data-focus="'+x[0]+'">'+TE(x[1])+'</a>':TE(x[1]))+'</li>'; }).join('')+'</ul>';
   box.hidden=false;
@@ -3579,7 +3829,8 @@ function authErrors(list){
 accountDialog.addEventListener('click',function(e){
   var t=e.target; if(!t||!t.closest) return;
   var as=t.closest('[data-auth-as]'); if(as){ AUTH.as=as.getAttribute('data-auth-as')==='reviewer'?'reviewer':'applicant'; AUTH.notice=''; authDraw(true); var ab=accountDialog.querySelector('[data-auth-as="'+AUTH.as+'"]'); if(ab) ab.focus(); return; }
-  var sw=t.closest('[data-auth-mode]'); if(sw){ AUTH.notice=''; AUTH.mode=sw.getAttribute('data-auth-mode'); authDraw(true); var f=$(AUTH.mode==='register'?'account-name':'account-email'); if(f) f.focus(); return; }
+  var ty=t.closest('[data-auth-type]'); if(ty){ AUTH.type=ty.getAttribute('data-auth-type')==='reviewer'?'reviewer':'applicant'; authDraw(true); var tb=accountDialog.querySelector('[data-auth-type="'+AUTH.type+'"]'); if(tb) tb.focus(); return; }
+  var sw=t.closest('[data-auth-mode]'); if(sw){ AUTH.notice=''; AUTH.mode=sw.getAttribute('data-auth-mode'); if(AUTH.mode==='register') AUTH.type=AUTH.as==='reviewer'?'reviewer':'applicant'; authDraw(true); var f=$(AUTH.mode==='register'?'account-name':'account-email'); if(f) f.focus(); return; }
   var fl=t.closest('[data-focus]'); if(fl){ e.preventDefault(); var el=$(fl.getAttribute('data-focus')); if(el) el.focus(); return; }
   if(t.closest('#account-close')) accountDialog.close();
 });
@@ -3595,12 +3846,15 @@ accountDialog.addEventListener('submit',function(e){
   msg.hidden=false; msg.textContent=T('lp.wait');
   var buttons=accountDialog.querySelectorAll('button');buttons.forEach(function(b){b.disabled=true});
   var body=m==='recover'?{email:email}:m==='register'?{email:email,password:pw,display_name:name.trim()}:{email:email,password:pw};
+  if(m==='register'&&AUTH.type==='reviewer'){ var inv=$('account-invite')?$('account-invite').value.trim():''; if(inv){ body.account_type='admin'; body.invite_code=inv; } else body.account_type='reviewer'; }
   accountRequest('/api/auth/'+m,body,false).then(function(data){
     if(m==='recover'){ msg.textContent=T('lp.recover.done'); return; }
     if(data.user&&m==='register'){
-      /* A new account does not sign in by itself: end the session the server opened, then ask for the credentials on the sign-in panel. */
-      AUTH.syncAfter=syncOpt;
-      return accountRequest('/api/auth/logout',{},false).catch(function(){}).then(function(){ AUTH.mode='login'; AUTH.as='applicant'; AUTH.notice='lp.created'; authDraw(true); var pf=$('account-password'); if(pf) pf.focus(); });
+      /* A new account does not sign in by itself: end the session the server opened, then ask for the credentials on the sign-in panel.
+         A reviewer request or an administrator account lands on the sign-in panel with Reviewer chosen. */
+      var kind=data.user.role;
+      AUTH.syncAfter=kind==='applicant'&&syncOpt;
+      return accountRequest('/api/auth/logout',{},false).catch(function(){}).then(function(){ AUTH.mode='login'; AUTH.as=kind==='applicant'?'applicant':'reviewer'; AUTH.notice=kind==='reviewer_pending'?'lp.reviewer.sent':kind==='admin'?'lp.created.admin':'lp.created'; AUTH.type='applicant'; authDraw(false); var ef=$('account-email'); if(ef) ef.value=email; var pf=$('account-password'); if(pf) pf.focus(); });
     }
     if(data.user){
       var staff=data.user.role!=='applicant';
@@ -3615,7 +3869,8 @@ accountDialog.addEventListener('submit',function(e){
     var c=String(err&&err.message||'');
     if(m==='recover'&&c!=='Failed to fetch'){ msg.hidden=false; msg.textContent=T('lp.recover.done'); return; }
     msg.hidden=true;
-    authErrors([[null,c==='Failed to fetch'?'lp.err.network':c==='invalid_credentials'?'lp.err.credentials':c==='email_taken'?'lp.err.taken':'lp.err.generic']]);
+    if(c==='invite_invalid'){ var dd=accountDialog.querySelector('details.invite'); if(dd) dd.open=true; authErrors([['account-invite','lp.err.invite']]); return; }
+    authErrors([[null,c==='Failed to fetch'?'lp.err.network':c==='invalid_credentials'?'lp.err.credentials':c==='email_taken'?'lp.err.taken':c==='rate_limited'?'lp.err.rate':'lp.err.generic']]);
   }).finally(function(){buttons.forEach(function(b){b.disabled=false})});
 });
 /* Password reset (the #reset=<token> link from the recovery email). */
@@ -3647,7 +3902,7 @@ function loadIdentity(){
   accountRequest('/api/me').then(function(d){ if(d&&d.user&&ACCOUNT&&ACCOUNT.id===uid){ ACCOUNT=Object.assign(ACCOUNT,d.user); accountChrome(); render(); } }).catch(function(){});
 }
 function enterAccount(user,keep){
-  ACCOUNT=user;SAVEKEY='pn-onboarding-user-'+user.id;lastSynced='';consLoad();APPREF=null;NOTIFS={state:'idle',items:[],unread:0};HIST={state:'idle',items:[]};
+  ACCOUNT=user;SAVEKEY='pn-onboarding-user-'+user.id;lastSynced='';consLoad();APPREF=null;NOTIFS={state:'idle',items:[],unread:0};HIST={state:'idle',items:[]};rvReset();
   stopSpeech();if(timer)clearInterval(timer);fresh();restore();CP.log=[];cpDraw();accountChrome();loadIdentity();SYNC.ready=false;SYNC.uid=null;PROF.edit=false;PROF.done=false;if(user.role==='applicant')appBoot(user.id);
   /* Signed-in people never rest on the landing page: a deep link they opened first wins, otherwise their role's home. */
   var tv=(keep&&VIEW==='welcome'&&BOOT_TARGET&&canSee(BOOT_TARGET.v))?BOOT_TARGET:null;BOOT_TARGET=null;
@@ -3664,7 +3919,7 @@ function accountRequest(path,body,retry,method){
 }
 var accountRefreshing=null;
 function signOut(){
-  accountRequest('/api/auth/logout',{},false).then(function(){SYNC.ready=false;SYNC.uid=null;SYNC.base=null;SYNC.st=null;SYNC.evq=[];SYNC.note='';clearTimeout(SYNC.timer);clearTimeout(SYNC.retryT);syncNoteDraw();pendingClear();ACCOUNT=null;APPREF=null;NOTIFS={state:'signedout',items:[],unread:0};HIST={state:'idle',items:[]};CONS={sync:false,analytics:false};SAVEKEY='pn-onboarding-v1';if(timer)clearInterval(timer);fresh();CP.log=[];cpDraw();accountChrome();workspaceDialog.close();show('welcome')}).catch(function(){announce(T('ui.error'))});
+  accountRequest('/api/auth/logout',{},false).then(function(){SYNC.ready=false;SYNC.uid=null;SYNC.base=null;SYNC.st=null;SYNC.evq=[];SYNC.note='';clearTimeout(SYNC.timer);clearTimeout(SYNC.retryT);syncNoteDraw();pendingClear();ACCOUNT=null;APPREF=null;rvReset();try{sessionStorage.removeItem(SIT_KEY)}catch(e){}tickStop();NOTIFS={state:'signedout',items:[],unread:0};HIST={state:'idle',items:[]};CONS={sync:false,analytics:false};SAVEKEY='pn-onboarding-v1';if(timer)clearInterval(timer);fresh();CP.log=[];cpDraw();accountChrome();workspaceDialog.close();show('welcome')}).catch(function(){announce(T('ui.error'))});
 }
 accountRequest('/api/auth/me',undefined,true).then(function(data){enterAccount(data.user,true)}).catch(function(){ACCOUNT=null;NOTIFS={state:'signedout',items:[],unread:0};accountChrome();render()});
 var lastSynced='',syncBusy=null;
@@ -3754,7 +4009,7 @@ var I18N_P6={en:{
  "h.dob":"You must be 18 or older","h.pan":"As printed on your card","h.aadhaar4":"We never ask for or store the full number","h.acct":"Savings or current account in your own name",
  "dp.page":"Your details · page {n} of {total}","dp.0.t":"Who you are","dp.0.d":"Exactly as printed on your PAN card. We compare it with the documents you upload next.","dp.1.t":"Your ID numbers","dp.1.d":"Your PAN, and only the last four digits of your Aadhaar.","dp.2.t":"How we reach you","dp.2.d":"Where we send your one follow-up message, if one is needed, and where you will work.","dp.3.t":"Bank account and consent","dp.3.d":"Commission is paid only into an account in your own name.",
  "btn.back":"Back","btn.next":"Next","btn.to_docs":"Continue to documents","err.sum":"{n} fields need your attention",
- "intro.pre":"Before you start","intro.h1":"Become a PolicyNest agent","intro.lead":"Everything happens on this screen, one step at a time. Read this list first so you have everything to hand.","intro.keep":"Keep these six ready","intro.time.h":"Take your time","intro.time.b":"Most applicants complete details and document upload in about 30 minutes. There is no countdown. Use Save and exit whenever you like and pick up where you stopped: if you chose to save, you continue on this device; otherwise closing this tab clears your progress.","intro.start":"Start onboarding","intro.resume":"Resume onboarding",
+ "intro.pre":"Before you start","intro.h1":"Become a PolicyNest agent","intro.lead":"Everything happens on this screen, one step at a time. Read this list first so you have everything to hand.","intro.keep":"Keep these six ready","intro.time.h":"Take your time","intro.time.b":"Most applicants complete details and document upload in about 30 minutes. A 30-minute timer shows at the top of the screen, and you can hide it. When it reaches zero, take 10 more minutes or save and come back: nothing is lost. Use Save and exit whenever you like and pick up where you stopped: if you chose to save, you continue on this device; otherwise closing this tab clears your progress.","intro.start":"Start onboarding","intro.resume":"Resume onboarding",
  "dg.0.0":"PAN card","dg.0.1":"Photo of the original card. Your name and date of birth on it are the reference for every other document.","dg.0.2":"Refused if it is a business PAN (4th letter not P), the number is not in the PAN format, or the photo is blurry or cropped.",
  "dg.1.0":"Aadhaar, front","dg.1.1":"Photo of the front, which shows your photo and date of birth. Only the last four digits are ever stored; the rest is masked.","dg.1.2":"Asked again if the name or date of birth differs from your PAN, or the photo is unclear.",
  "dg.2.0":"Aadhaar, back","dg.2.1":"Photo of the back, which shows your address.","dg.2.2":"Refused if it is the front of the card. Asked again if the photo is unclear.",
@@ -3780,7 +4035,7 @@ var I18N_P6={en:{
  "h.dob":"आपकी उम्र 18 वर्ष या अधिक होनी चाहिए","h.pan":"जैसा आपके कार्ड पर छपा है","h.aadhaar4":"हम पूरा नंबर न माँगते हैं, न सहेजते हैं","h.acct":"आपके अपने नाम का बचत या चालू खाता",
  "dp.page":"आपकी जानकारी · पेज {n}/{total}","dp.0.t":"आप कौन हैं","dp.0.d":"ठीक वैसा जैसा आपके PAN कार्ड पर छपा है। हम इसे आपके अगले अपलोड किए दस्तावेज़ों से मिलाते हैं।","dp.1.t":"आपके पहचान नंबर","dp.1.d":"आपका PAN और आधार के केवल आख़िरी चार अंक।","dp.2.t":"हम आप तक कैसे पहुँचें","dp.2.d":"जहाँ हम आपको एक फ़ॉलो-अप संदेश भेजेंगे (अगर ज़रूरत हो), और जहाँ आप काम करेंगे।","dp.3.t":"बैंक खाता और सहमति","dp.3.d":"कमीशन केवल आपके अपने नाम के खाते में दिया जाता है।",
  "btn.back":"पीछे","btn.next":"आगे","btn.to_docs":"दस्तावेज़ों पर जाएँ","err.sum":"{n} फ़ील्ड पर आपका ध्यान चाहिए",
- "intro.pre":"शुरू करने से पहले","intro.h1":"PolicyNest एजेंट बनें","intro.lead":"सब कुछ इसी स्क्रीन पर, एक-एक चरण में होता है। पहले यह सूची पढ़ लें ताकि सब कुछ हाथ में रहे।","intro.keep":"ये छह तैयार रखें","intro.time.h":"आराम से करें","intro.time.b":"ज़्यादातर आवेदक लगभग 30 मिनट में जानकारी और दस्तावेज़ अपलोड पूरे कर लेते हैं। कोई उलटी गिनती नहीं है। जब चाहें सहेजें और बाहर निकलें, और जहाँ रुके थे वहीं से आगे बढ़ें: अगर आपने सहेजना चुना है तो इसी डिवाइस पर जारी रहेगा; नहीं तो यह टैब बंद करने पर आपकी प्रगति मिट जाएगी।","intro.start":"ऑनबोर्डिंग शुरू करें","intro.resume":"ऑनबोर्डिंग जारी रखें",
+ "intro.pre":"शुरू करने से पहले","intro.h1":"PolicyNest एजेंट बनें","intro.lead":"सब कुछ इसी स्क्रीन पर, एक-एक चरण में होता है। पहले यह सूची पढ़ लें ताकि सब कुछ हाथ में रहे।","intro.keep":"ये छह तैयार रखें","intro.time.h":"आराम से करें","intro.time.b":"ज़्यादातर आवेदक लगभग 30 मिनट में जानकारी और दस्तावेज़ अपलोड पूरे कर लेते हैं। स्क्रीन के ऊपर 30 मिनट का टाइमर दिखता है, जिसे आप छिपा सकते हैं। समय पूरा होने पर 10 मिनट और लें या सहेजकर बाद में लौटें: कुछ भी नहीं खोता। जब चाहें सहेजें और बाहर निकलें, और जहाँ रुके थे वहीं से आगे बढ़ें: अगर आपने सहेजना चुना है तो इसी डिवाइस पर जारी रहेगा; नहीं तो यह टैब बंद करने पर आपकी प्रगति मिट जाएगी।","intro.start":"ऑनबोर्डिंग शुरू करें","intro.resume":"ऑनबोर्डिंग जारी रखें",
  "dg.0.0":"PAN कार्ड","dg.0.1":"मूल कार्ड की फ़ोटो। इस पर आपका नाम और जन्म तिथि बाकी हर दस्तावेज़ के लिए आधार है।","dg.0.2":"अस्वीकार हो सकता है अगर यह व्यावसायिक PAN है (चौथा अक्षर P नहीं), नंबर PAN के प्रारूप में नहीं है, या फ़ोटो धुँधली या कटी हुई है।",
  "dg.1.0":"आधार, आगे का भाग","dg.1.1":"आगे के भाग की फ़ोटो, जिसमें आपकी तस्वीर और जन्म तिथि है। केवल आख़िरी चार अंक सहेजे जाते हैं; बाकी छिपाए जाते हैं।","dg.1.2":"अगर नाम या जन्म तिथि आपके PAN से अलग है, या फ़ोटो साफ़ नहीं है, तो दोबारा माँगा जाता है।",
  "dg.2.0":"आधार, पीछे का भाग","dg.2.1":"पीछे के भाग की फ़ोटो, जिसमें आपका पता है।","dg.2.2":"अगर यह कार्ड का आगे का भाग है तो अस्वीकार हो जाता है। फ़ोटो साफ़ न हो तो दोबारा माँगा जाता है।",
@@ -3902,7 +4157,9 @@ window.addEventListener("load",function(){ badgeSync(); setTimeout(badgeSync,120
   verification_passed:["verification_completed","verification"],verification_followup:["more_info_requested","documents"],verification_review:["human_review_started","verification"],fixes_received:["fixes_received","documents"],
   training_module_done:["training_milestone","training"],training_complete:["training_complete","training"],exam_passed:["exam_passed","exam"],exam_failed:["exam_failed","exam"],certificate_issued:["certificate_issued","certificate"],
   dispute_submitted:["dispute_raised","verification"],review_approved:["review_approved","verification"],review_more_info:["review_more_info","documents"],review_rejected:["review_rejected","verification"],
-  review_in_progress:["review_in_progress","verification"],appeal_update:["appeal_update","verification"]};
+  review_in_progress:["review_in_progress","verification"],appeal_update:["appeal_update","verification"],
+  "review.approved":["review_approved","verification"],"review.rejected":["review_rejected","verification"],"review.more_info":["review_more_info","documents"],
+  "appeal.upheld":["appeal_update","verification"],"appeal.overturned":["appeal_overturned","verification"],"appeal.more_info":["appeal_update","verification"]};
  Object.keys(m).forEach(function(k){ if(!M_has(TIMELINE_EVENTS,k)||k==="certificate_issued"||k==="fixes_received") TIMELINE_EVENTS[k]={k:m[k][0],stage:m[k][1]}; });
 })();
 
@@ -3974,7 +4231,7 @@ function evState(){
   if(accepted()===6) add("docs_complete","documents");
   if(S.reached.SUBMITTED&&!S.rechecking&&S.checks&&S.checks.length&&S.shown>=S.checks.length){
     var D=S.decision,sx="r"+(S.round||1);
-    if(D==="APPROVE") add("verification_passed","verification",null,sx); else if(D==="NEEDS_MORE_INFO") add("verification_followup","documents",null,sx); else if(D==="HUMAN_REVIEW") add("verification_review","verification",null,sx);
+    if(D==="APPROVE") add("verification_passed","verification",null,sx); else if(D==="NEEDS_MORE_INFO"&&!(S.fu&&S.fu.rv)) add("verification_followup","documents",null,sx); else if(D==="HUMAN_REVIEW") add("verification_review","verification",null,sx);
   }
   if((S.round||1)>1) add("fixes_received","documents",null,"r"+S.round);
   if(S.disputed) add("dispute_submitted","verification");
@@ -4123,6 +4380,8 @@ function appBoot(uid){
   return accountRequest("/api/applications/me").catch(function(e){ if(e&&e.status===404) return accountRequest("/api/applications/me",{}); throw e; }).then(function(d){
     if(!ACCOUNT||ACCOUNT.id!==uid||!d||!d.application) return;
     notifLoad(true);
+    /* A reviewer's decision (approve, reject or a request for more information) applies once the local copy is in place below. */
+    setTimeout(function(){ if(ACCOUNT&&ACCOUNT.id===uid&&!SYNC.pendingApp) rvApply(d.application.review); },0);
     var app=d.application; APPREF=app.reference; SYNC.base=app; SYNC.version=app.version;
     if(app.details&&app.details.mobile&&String(app.details.mobile).indexOf("•")>=0) SYNC.masked=String(app.details.mobile);
     var remoteHas=appHasData(app),localHas=!!(S.begun||M_hasData(S));
@@ -4142,7 +4401,7 @@ function appBoot(uid){
     else { if(Object.keys(diff).length){ applyRemote(app,{merge:true,keep:diff}); syncStart(false); } else syncStart(true); }
   }).catch(function(){ render(); });
 }
-function syncAccept(){ var app=SYNC.pendingApp; SYNC.pendingApp=null; if(!app||!ACCOUNT) return; CONS.sync=true; consSave(); applyRemote(app); syncNote(T("sync.loaded")); syncStart(true); show(roleOf().first); }
+function syncAccept(){ var app=SYNC.pendingApp; SYNC.pendingApp=null; if(!app||!ACCOUNT) return; CONS.sync=true; consSave(); applyRemote(app); syncNote(T("sync.loaded")); syncStart(true); rvApply(app.review); show(roleOf().first); }
 function syncDecline(){ SYNC.pendingApp=null; }
 /* Turning sync on later (Profile, or the first sign-in choice): same boot, so nothing is overwritten before the server copy is read. */
 function syncEnable(){ if(ACCOUNT&&ACCOUNT.role==="applicant"&&!SYNC.ready) appBoot(ACCOUNT.id); else syncMark(); }
@@ -4347,6 +4606,358 @@ $('appeal-close').addEventListener('click',function(){appealDialog.close()});
 $('appeal-form').addEventListener('submit',function(e){e.preventDefault();var button=e.submitter;button.disabled=true;
   accountRequest('/api/appeals',{explanation:$('appeal-concern').value}).then(function(result){productEvent('appeal_submitted');$('appeal-result').textContent='Appeal submitted. Reference '+result.reference+'. Status: '+result.status;cpPush('a','Your appeal was submitted to the human review process. Reference '+result.reference+'. It is awaiting reviewer assignment.');}).catch(function(){ $('appeal-result').textContent='The appeal could not be submitted. Please check your session and try again.';}).finally(function(){button.disabled=false});
 });
+/* ===== Lane RV-FE: the waiting page for reviewer requests, the administrator's reviewer requests, the review console, and reviewer decisions
+   as the applicant sees them. Contract: planning/REVIEWER_API.md. Reviewers see check results, document statuses, issue codes and a few
+   allow-listed details; photos, document text and full ID numbers stay on the applicant's device and are never stored on the server. ===== */
+var RV,REQ,WAIT,RVN=null;
+function rvReset(){
+  RV={tab:"needs_review",q:"",seq:0,list:{state:"idle",items:[],counts:null},apl:{state:"idle",items:[]},sel:null,det:{state:"idle",ref:null,data:null,err:""}};
+  REQ={tab:"pending",state:"idle",items:[],seq:0};
+  WAIT={msg:"",busy:false};
+  RVN=null; APL={state:"idle",items:[],draft:""};
+}
+rvReset();
+var RV_NOTICE="Photos and document text stay on the applicant's device. You see the results of the checks, not the images.";
+var ID_RE=/\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b/;
+function cap(s){ s=String(s==null?"":s); return s.charAt(0).toUpperCase()+s.slice(1); }
+function issLabel(c,lang){ var k="iss."+c; return t(M_has(I18N.en,k)?k:"iss.OTHER",null,lang||"en"); }
+function docEn(k){ return I18N.en["doc."+k]||k; }
+function rvAt(sec){ return sec?M_fmtClock(sec*1000,"en"):"not recorded"; }
+function rvWait(s){ if(s==null) return ""; s=Math.max(0,Math.floor(s)); if(s<60) return "waiting under a minute"; var m=Math.floor(s/60); if(m<60) return "waiting "+m+" min"; var h=Math.floor(m/60); if(h<48) return "waiting "+h+" h"; return "waiting "+Math.floor(h/24)+" days"; }
+var RV_ENG={APPROVE:["","Engine: approve"],NEEDS_MORE_INFO:["w","Engine: needs more info"],REJECT:["b","Engine: reject"],HUMAN_REVIEW:["o","Engine: a person decides"]};
+function rvEng(d){ var e=RV_ENG[d]; return e?'<span class="chip '+e[0]+'">'+e[1]+'</span>':'<span class="chip n">No engine decision</span>'; }
+var RV_DOCST={verified:["","Verified"],needs_fix:["w","Needs a fix"],rejected:["b","Not accepted"]};
+function rvDocChip(st){ var e=RV_DOCST[st]; return e?'<span class="chip '+e[0]+'">'+e[1]+'</span>':'<span class="chip n">Not added</span>'; }
+var RV_ACTW={approve:"Approved",reject:"Rejected",more_info:"Asked for more info"};
+function rvChips(o){
+  var out=""; if(o.open_appeal) out+='<span class="chip o">Appeal open</span>';
+  if(o.needs_review) out+='<span class="chip w">Needs review</span>';
+  if(o.review&&o.review.action) out+='<span class="chip '+(o.review.action==="reject"?"b":o.review.action==="approve"?"":"n")+'">'+RV_ACTW[o.review.action]+'</span>';
+  return out;
+}
+function rvErrState(e){ return e&&e.status===403?"denied":e&&e.status===401?"signin":"error"; }
+function rvToast(title,body){
+  var box=$("toasts"); if(!box) return; var el=document.createElement("div"); el.className="toast"; el.setAttribute("role","status");
+  el.innerHTML='<span class="ti"><svg viewBox="0 0 16 16" aria-hidden="true">'+TICON.ok+'</svg></span><div><b>'+esc(title)+'</b><span>'+esc(body)+'</span></div><button type="button" aria-label="Dismiss">×</button>';
+  function bye(){ if(el.parentNode) el.parentNode.removeChild(el); }
+  el.querySelector("button").addEventListener("click",bye); box.appendChild(el); while(box.children.length>3) box.removeChild(box.firstChild); setTimeout(bye,5200);
+}
+function rvState(st,what,retry,denied){
+  if(st==="loading"||st==="idle") return '<p class="small muted" role="status">Loading '+what+'…</p>';
+  if(st==="denied") return '<div class="empty" role="alert">'+(denied||"You do not have access to the review queue. Only approved reviewers and administrators can open it.")+'</div>';
+  if(st==="signin") return '<div class="empty" role="alert">Your session has ended. Sign out and sign in again to continue.</div>';
+  if(st==="missing") return '<div class="empty" role="alert">This application was not found. <a href="#review">Back to the queue</a></div>';
+  if(st==="error") return '<div class="empty" role="alert">We could not load '+what+'. <button class="btn sm" type="button" data-act="'+retry+'">Try again</button></div>';
+  return null;
+}
+/* ---- review console: data ---- */
+function rvOnShow(){ if(!staffSignedIn()) return; if(RV.sel) rvDetLoad(RV.sel); else rvLoad(); }
+function rvDraw(){ if(VIEW==="ops"&&staffSignedIn()) renderConsole(); }
+function rvLoad(say){
+  if(!staffSignedIn()) return;
+  var seq=++RV.seq,apl=RV.tab==="appeals",tab=apl?"needs_review":RV.tab,q=apl?"":RV.q;
+  if(RV.list.state!=="ok") RV.list.state="loading"; if(apl&&RV.apl.state!=="ok") RV.apl.state="loading"; rvDraw();
+  var p1=accountRequest("/api/reviewer/applications?tab="+tab+(q?"&q="+encodeURIComponent(q):"")).then(function(d){ if(seq===RV.seq) RV.list={state:"ok",items:(d&&d.items)||[],counts:(d&&d.counts)||null}; })
+    .catch(function(e){ if(seq===RV.seq) RV.list={state:rvErrState(e),items:[],counts:RV.list.counts}; });
+  var p2=apl?accountRequest("/api/reviewer/appeals?status=open").then(function(d){ if(seq===RV.seq) RV.apl={state:"ok",items:(d&&d.items)||[]}; })
+    .catch(function(e){ if(seq===RV.seq) RV.apl={state:rvErrState(e),items:[]}; }):Promise.resolve();
+  Promise.all([p1,p2]).then(function(){ if(seq!==RV.seq) return; rvDraw(); if(say){ var n=apl?rvAplItems().length:RV.list.items.length; announce(n+(apl?(n===1?" open appeal":" open appeals"):(n===1?" application":" applications"))+" shown"); } });
+}
+function rvDetLoad(ref){
+  if(!staffSignedIn()||!ref) return;
+  var seq=++RV.seq; if(!(RV.det.state==="ok"&&RV.det.ref===ref)) RV.det={state:"loading",ref:ref,data:null,err:""}; rvDraw();
+  accountRequest("/api/reviewer/applications/"+encodeURIComponent(ref)).then(function(d){ if(seq===RV.seq) RV.det={state:"ok",ref:ref,data:d,err:""}; })
+    .catch(function(e){ if(seq===RV.seq) RV.det={state:e&&e.status===404?"missing":rvErrState(e),ref:ref,data:null,err:""}; })
+    .then(function(){ if(seq===RV.seq) rvDraw(); });
+}
+function rvAplItems(){ var q=RV.q.toLowerCase(); return (RV.apl.items||[]).filter(function(a){ return !q||String(a.reference||"").toLowerCase().indexOf(q)>=0||String(a.display_name||"").toLowerCase().indexOf(q)>=0; }); }
+/* ---- review console: screens ---- */
+var RV_TABS=[["needs_review","Needs review"],["appeals","Appeals"],["all","All"],["decided","Decided"]];
+function renderConsole(){
+  var el=$("view-ops"),mode=RV.sel?"detail":"queue",fr=el.querySelector(".rvc");
+  if(!fr||fr.getAttribute("data-mode")!==mode||(mode==="detail"&&fr.getAttribute("data-ref")!==RV.sel)){
+    el.__h=null;
+    el.innerHTML=mode==="queue"?
+      '<div class="rvc" data-mode="queue"><div class="hello"><div><h1>Review console</h1><p class="muted">Applications the rulebook keeps with a person, resubmissions after you asked for more, and appeals. Oldest wait first.</p></div></div>'+
+      '<div id="rv-kpi"></div><div class="rvtabs" id="rv-tabs" role="group" aria-label="Queue"></div>'+
+      '<div class="rvsearch"><label for="rv-q">Search by reference or name</label><input id="rv-q" type="search" maxlength="80" autocomplete="off" spellcheck="false"></div><div id="rv-list"></div></div>':
+      '<div class="rvc" data-mode="detail" data-ref="'+esc(RV.sel)+'"><div class="rvacts"><a class="btn sm" href="#review">← Back to the queue</a></div><h1 id="rv-dh" tabindex="-1"></h1><div id="rv-det"></div></div>';
+    var qi=$("rv-q"); if(qi) qi.value=RV.q;
+  }
+  if(mode==="queue"){ setHtml($("rv-kpi"),rvKpis()); setHtml($("rv-tabs"),rvTabs()); setHtml($("rv-list"),RV.tab==="appeals"?rvAplList():rvList()); return; }
+  var D=RV.det,hd=$("rv-dh"),title=D.state==="ok"?(D.data.display_name||"Applicant")+" · "+D.ref:"Case "+RV.sel; if(hd.textContent!==title) hd.textContent=title;
+  setHtml($("rv-det"),rvDetail());
+}
+function rvKpis(){
+  var c=RV.list.counts; function n(k){ return c&&typeof c[k]==="number"?String(c[k]):"–"; }
+  function k(cls,label,key,sub){ return '<div class="box '+cls+' s3"><span class="small"><b>'+label+'</b></span><b class="num" style="font-size:2.4rem">'+n(key)+'</b><span class="small muted">'+sub+'</span></div>'; }
+  return '<div class="bento">'+k("hot","Needs review","needs_review","Waiting for a person to decide")+k("lime","Open appeals","appeals","Applicants asking a person to look again")+
+    k("","All submitted","all","Sent for checking")+k("ink","Decided","decided","Latest reviewer action is approve or reject")+
+    '<div class="box s12 rvnotice" role="note">'+svgi("alert")+'<p class="small"><b>'+esc(RV_NOTICE)+'</b> The engine decision is what the applicant\'s device reported after its automatic checks; your decision is recorded on the server.</p></div></div>';
+}
+function rvTabs(){
+  var c=RV.list.counts||{};
+  return RV_TABS.map(function(x){ var n=typeof c[x[0]]==="number"?c[x[0]]:null; return '<button type="button" data-act="rvc-tab" data-tab="'+x[0]+'" aria-pressed="'+(RV.tab===x[0])+'">'+x[1]+(n!==null?' <span class="cnt">'+n+'</span>':'')+'</button>'; }).join("");
+}
+function rvIssChips(list){ list=list||[]; return list.slice(0,3).map(function(c){return '<span class="chip n">'+esc(cap(issLabel(c)))+'</span>'}).join("")+(list.length>3?'<span class="chip n">+'+(list.length-3)+' more</span>':''); }
+function rvList(){
+  var s=rvState(RV.list.state,"the queue","rvc-retry"); if(s) return s;
+  var it=RV.list.items;
+  if(!it.length) return '<div class="empty">'+(RV.q?"No applications match “"+esc(RV.q)+"”.":RV.tab==="needs_review"?"Nothing needs review right now.":RV.tab==="decided"?"No reviewer decisions yet.":"No submitted applications yet.")+'</div>';
+  return '<ul class="rvlist" aria-label="Applications">'+it.map(function(i){
+    return '<li><a class="rvrow" href="#review/'+esc(i.reference)+'"><span class="rf"><b>'+esc(i.display_name||"Applicant")+'</b><span class="mono small muted">'+esc(i.reference)+(i.round>1?' · round '+esc(i.round):'')+'</span></span>'+
+      '<span class="rm">'+rvChips(i)+rvEng(i.engine_decision)+rvIssChips(i.open_issues)+'</span><span class="rw">'+esc(i.needs_review?rvWait(i.waiting_seconds):"updated "+rvAt(i.updated_at))+'</span></a></li>';
+  }).join("")+'</ul>'+(it.length>=200?'<p class="small muted">Showing the first 200. Search to narrow the list.</p>':'');
+}
+function rvAplList(){
+  var s=rvState(RV.apl.state,"appeals","rvc-retry"); if(s) return s;
+  var it=rvAplItems(); if(!it.length) return '<div class="empty">'+(RV.q?"No open appeals match “"+esc(RV.q)+"”.":"No open appeals.")+'</div>';
+  return '<ul class="rvlist" aria-label="Open appeals">'+it.map(function(a){
+    var ex=String(a.explanation||""),inner='<span class="rf"><b>'+esc(a.display_name||"Applicant")+'</b><span class="mono small muted">'+esc(a.reference||"no application")+' · '+esc(a.id)+'</span></span><span class="rm"><span class="chip o">Appeal open</span><span class="small">“'+esc(ex.slice(0,140))+(ex.length>140?"…":"")+'”</span></span><span class="rw">'+esc(rvWait(a.waiting_seconds))+'</span>';
+    return '<li>'+(a.reference?'<a class="rvrow" href="#review/'+esc(a.reference)+'">'+inner+'</a>':'<div class="rvrow">'+inner+'</div>')+'</li>';
+  }).join("")+'</ul>';
+}
+var RV_DL=[["name","Name"],["dob","Date of birth"],["state","State"],["city","City"],["education","Highest education"],["pan_last4","PAN, last 4"],["aadhaar4","Aadhaar, last 4"],["acct_last4","Bank account, last 4"],["language","Language"]];
+function rvLatest(d){ var r=d.reviews||[]; return r.length?r[r.length-1]:null; }
+function rvDetail(){
+  var D=RV.det,s=rvState(D.state,"this application","rvc-dretry"); if(s) return s;
+  var d=D.data,p=d.progress||{},st=d.state||{},docs=p.documents||{},det=d.details||{},latest=rvLatest(d),issues=[];
+  M_DOC_KEYS.forEach(function(k){ var v=docs[k]; ((v&&v.issues)||[]).forEach(function(c){ if(issues.indexOf(c)<0) issues.push(c); }); });
+  var head='<div class="box s8"><span class="mono small muted">'+esc(d.reference)+'</span><div class="rvacts">'+rvChips({open_appeal:st.open_appeal,needs_review:st.needs_review,review:latest})+'</div>'+
+    '<p class="small muted">Submitted '+esc(rvAt(d.submitted_at))+' · last update '+esc(rvAt(d.updated_at))+(p.round?' · round '+esc(p.round):'')+(p.stage?' · stage: '+esc(p.stage):'')+'</p>'+
+    (d.assigned_reviewer?'<p class="small">Assigned to '+esc(d.assigned_reviewer)+'</p>':'')+'</div>';
+  var eng='<div class="box ink s4"><h2>Engine decision</h2><div>'+rvEng(p.decision)+'</div><ul class="small">'+(issues.length?issues.map(function(c){return '<li>'+esc(cap(issLabel(c)))+' <span class="mono">'+esc(c)+'</span></li>'}).join(""):'<li>No open issues reported.</li>')+'</ul><p class="small muted">Reported by the applicant\'s device after its automatic checks.</p></div>';
+  var note='<div class="box lime s12 rvnotice" role="note">'+svgi("alert")+'<div><p><b>'+esc(RV_NOTICE)+'</b></p>'+(d.data_notice?'<p class="small muted">'+esc(d.data_notice)+'</p>':'')+'</div></div>';
+  var dcs='<div class="box s6"><h2>Documents</h2><div class="rvdocs">'+M_DOC_KEYS.map(function(k){ var v=docs[k];
+    return '<div class="rvdoc"><b>'+esc(docEn(k))+'</b>'+rvDocChip(v&&v.status)+((v&&v.issues&&v.issues.length)?'<span class="small">'+v.issues.map(function(c){return esc(cap(issLabel(c)))}).join("; ")+'</span>':'')+(v&&v.version>1?'<span class="small muted">Version '+esc(v.version)+'</span>':'')+'</div>'; }).join("")+'</div></div>';
+  var tr=p.training||{},ex=p.exam||{};
+  var dl='<div class="box s6"><h2>Details the applicant typed</h2><dl class="rvdl">'+RV_DL.map(function(x){ var v=det[x[0]]; return '<dt>'+x[1]+'</dt><dd>'+(v?esc(x[0]==="dob"?fmtDate(v):x[0]==="language"?(v==="hi"?"Hindi":"English"):v):'<span class="muted">Not given</span>')+'</dd>'; }).join("")+
+    '<dt>Training</dt><dd>'+esc((tr.modules_done||0)+" of 5 modules, "+(tr.hours||0)+" of 15 hours")+'</dd><dt>Exam</dt><dd>'+esc(typeof ex.score==="number"?ex.score+"%"+(ex.passed?" (passed)":""):"Not taken")+'</dd></dl>'+
+    '<p class="small muted">Identifiers show the last four characters only. Email, mobile number and IFSC are not shown to reviewers.</p></div>';
+  var aps=d.appeals||[],revs=(d.reviews||[]).slice().reverse(),tl=applicantTimeline(d.timeline||[]).slice().reverse(),iev=d.internal_events||[];
+  var apBox='<div class="box s6"><h2>Appeals</h2>'+(aps.length?'<ul class="rvtl">'+aps.map(function(a){ return '<li><b>'+esc(a.status)+' · '+esc(rvAt(a.created_at))+'</b><span class="small">“'+esc(a.explanation||"")+'”</span>'+(a.response?'<span class="small muted">Answer: '+esc(a.response)+'</span>':'')+'</li>'; }).join("")+'</ul>':'<p class="small muted">No appeals.</p>')+'</div>';
+  var rvBox='<div class="box s6"><h2>Review history</h2>'+(revs.length?'<ul class="rvtl">'+revs.map(function(r){
+    return '<li><b>'+esc(RV_ACTW[r.action]||r.action)+' · round '+esc(r.round)+' · '+esc(rvAt(r.at))+'</b>'+(r.reviewer?'<span class="small muted">By '+esc(r.reviewer)+(r.source==="appeal"?' (answering an appeal)':'')+'</span>':'')+
+      (r.message?'<span class="small">To the applicant: '+esc(r.message)+'</span>':'')+((r.items||[]).length?'<span class="small">Asked for: '+r.items.map(function(i){return esc(docEn(i.doc))+' ('+esc(issLabel(i.issue))+')'}).join("; ")+'</span>':'')+
+      (r.note?'<span class="small muted">Internal note: '+esc(r.note)+'</span>':'')+'</li>'; }).join("")+'</ul>':'<p class="small muted">No reviewer decisions yet.</p>')+'</div>';
+  var tlBox='<div class="box s12"><h2>Timeline</h2>'+(tl.length?'<ul class="rvtl">'+tl.slice(0,40).map(function(e){ return '<li><b>'+esc(t(e.key,e.params,"en"))+'</b><span class="small muted">'+esc(t("actor."+e.actor,null,"en"))+(e.t?" · "+esc(M_fmtClock(e.t,"en")):"")+'</span></li>'; }).join("")+'</ul>':'<p class="small muted">No timeline entries yet.</p>')+
+    (iev.length?'<details class="dd"><summary>Internal events ('+iev.length+', staff only)</summary><ul class="rvtl">'+iev.map(function(e){ return '<li><b>'+esc(String(e.action).replace(/_/g," ").toLowerCase())+'</b><span class="small muted">'+esc(e.actor_role)+' · '+esc(rvAt(e.at))+'</span></li>'; }).join("")+'</ul></details>':'')+'</div>';
+  return '<div class="bento">'+head+eng+note+rvActBox(d,st,latest)+dcs+dl+apBox+rvBox+tlBox+'</div>';
+}
+function rvActBox(d,st,latest){
+  var h='<section class="box s12" id="rv-actbox" aria-labelledby="rv-act-h"><h2 id="rv-act-h">'+(st.open_appeal?"Answer the appeal":"Your decision")+'</h2>';
+  if(d.own_application) return h+'<p class="small">This is your own application. You cannot decide it.</p></section>';
+  if(!st.submitted) return h+'<p class="small">This application has not been submitted yet.</p></section>';
+  if(st.open_appeal){
+    var ap=(d.appeals||[]).filter(function(a){return a.status==="OPEN"})[0]||{};
+    return h+'<p class="small muted">Raised '+esc(rvAt(ap.created_at))+'. The applicant wrote:</p><div class="msg">'+esc(ap.explanation||"")+'</div>'+
+      '<div class="rvacts"><button class="btn pri" type="button" data-act="rvc-appeal" data-outcome="overturn" data-apid="'+esc(ap.id||"")+'">Overturn and approve</button><button class="btn" type="button" data-act="rvc-appeal" data-outcome="more_info" data-apid="'+esc(ap.id||"")+'">Ask for more info</button><button class="btn" type="button" data-act="rvc-appeal" data-outcome="uphold" data-apid="'+esc(ap.id||"")+'">Uphold the decision</button></div>'+
+      '<p class="small muted">Overturning approves the application. Every answer asks you to confirm and goes to the applicant with your message.</p></section>';
+  }
+  var round=(d.progress&&d.progress.round)|0;
+  if(latest&&(latest.action==="approve"||latest.action==="reject")&&latest.round>=round)
+    return h+'<p>'+esc(RV_ACTW[latest.action])+' '+esc(rvAt(latest.at))+' (round '+esc(latest.round)+').</p><p class="small muted">A final decision stands for this round. If the applicant appeals, the appeal appears here.</p></section>';
+  return h+(st.needs_review?'':'<p class="small muted">This application is not waiting for a reviewer. You can still decide it.</p>')+
+    '<div class="rvacts"><button class="btn pri" type="button" data-act="rvc-decide" data-rvact="approve" aria-keyshortcuts="A">Approve <kbd aria-hidden="true">A</kbd></button><button class="btn" type="button" data-act="rvc-decide" data-rvact="more_info" aria-keyshortcuts="M">Ask for more info <kbd aria-hidden="true">M</kbd></button><button class="btn" type="button" data-act="rvc-decide" data-rvact="reject" aria-keyshortcuts="R">Reject <kbd aria-hidden="true">R</kbd></button></div>'+
+    '<p class="small muted">Keyboard: A approve, M ask for more info, R reject (not while typing). Every action asks you to confirm.</p></section>';
+}
+/* Shortcuts A / M / R on an open case, never while typing or while a dialog is open. */
+document.addEventListener("keydown",function(e){
+  if(VIEW!=="ops"||!staffSignedIn()||!RV.sel||RV.det.state!=="ok"||e.ctrlKey||e.metaKey||e.altKey) return;
+  var tg=e.target; if(tg&&(/^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName)||tg.isContentEditable)) return;
+  if(document.querySelector("dialog[open]")) return;
+  var a={a:"approve",m:"more_info",r:"reject"}[String(e.key||"").toLowerCase()]; if(!a) return;
+  var b=document.querySelector('#view-ops [data-rvact="'+a+'"]'); if(!b) return; e.preventDefault(); b.click();
+});
+var rvQT=null;
+document.addEventListener("input",function(e){ if(!e.target||e.target.id!=="rv-q") return; var v=String(e.target.value||"").slice(0,80); clearTimeout(rvQT); rvQT=setTimeout(function(){ if(v===RV.q) return; RV.q=v.trim(); if(RV.tab==="appeals"){ rvDraw(); announce(rvAplItems().length+" open appeals shown"); } else rvLoad(true); },300); });
+/* ---- one dialog for every reviewer and administrator action: it is the confirmation step ---- */
+var rvDlg=document.createElement("dialog"); rvDlg.className="pdlg wide"; rvDlg.id="rv-dlg"; rvDlg.setAttribute("aria-labelledby","rvd-h"); document.body.appendChild(rvDlg);
+var RVD=null;
+var RV_ERR={message_required:"Write a message to the applicant.",message_too_long:"The message can be up to 600 characters.",invalid_message:"The message is not valid.",
+  id_number:"Remove ID numbers (PAN, Aadhaar or account numbers) from the {field}.",unsafe_message:"Rephrase the message: it must not accuse the applicant.",
+  invalid_note:"The internal note is too long.",invalid_items:"Choose at least one valid document to ask for.",own_application:"You cannot decide your own application.",
+  forbidden:"This case is assigned to another reviewer, or your role cannot do this.",not_found:"This item no longer exists.",not_submitted:"This application has not been submitted yet.",
+  appeal_open:"An appeal is open on this application. Answer the appeal instead.",already_decided:"A final decision already stands for this round. The page is refreshed.",
+  already_resolved:"This appeal has already been answered. The page is refreshed.",invalid_outcome:"Choose an outcome.",invalid_decision:"Choose approve or deny.",rate_limited:"Too many requests. Wait a moment and try again."};
+function rvErrText(e){
+  var c=String(e&&e.message||"");
+  if(e&&!e.status) return "We could not reach the server. Check your connection and try again.";
+  if(c==="already_decided"&&RVD&&RVD.kind==="req") return "This request was already decided. The list is refreshed.";
+  var m=RV_ERR[c]||"Something went wrong. Please try again.";
+  return m.replace("{field}",(e.data&&e.data.field)==="note"?"internal note":"message");
+}
+function rvPairs(d){
+  var out=[],docs=(d.progress&&d.progress.documents)||{};
+  M_DOC_KEYS.forEach(function(k){ var v=docs[k]; if(!v) return; var iss=(v.issues||[]).filter(function(c){return /^[A-Z][A-Z0-9_]{0,39}$/.test(c)});
+    iss.forEach(function(c){ out.push({doc:k,issue:c,on:true}); }); if(!iss.length&&v.status&&v.status!=="verified") out.push({doc:k,issue:"REUPLOAD",on:true}); });
+  return out;
+}
+function rvMoreMsg(pairs){
+  var on=pairs.filter(function(p){return p.on}); if(!on.length) return "";
+  var s="Please send these again so we can finish checking your application:\n"+on.map(function(p){return "- "+docEn(p.doc)+": "+issLabel(p.issue)}).join("\n");
+  return s.length>600?s.slice(0,597)+"…":s;
+}
+function rvPairsHtml(){
+  var P=RVD.pairs;
+  return '<fieldset class="rvchk" id="rvd-pairs" tabindex="-1"><legend><b>What the applicant must send again</b></legend>'+(P.length?P.map(function(p,i){ return '<label><input type="checkbox" data-pair="'+i+'"'+(p.on?' checked':'')+'><span>'+esc(docEn(p.doc))+' · '+esc(cap(issLabel(p.issue)))+' <span class="mono small muted">'+esc(p.issue)+'</span></span></label>'; }).join(""):'<p class="small muted">No open issues were reported. Add a document below.</p>')+'</fieldset>'+
+    '<label for="rvd-add">Add another document</label><select id="rvd-add"><option value="">Choose a document</option>'+M_DOC_KEYS.map(function(k){return '<option value="'+k+'">'+esc(docEn(k))+'</option>'}).join("")+'</select>';
+}
+function rvDlgOpen(spec,trigger){
+  RVD=spec; RVD.prev=trigger||document.activeElement; RVD.busy=false;
+  var k=spec.kind,a=spec.action,o=spec.outcome,h,lead,msgLabel,msg="",ph="",msgReq=true,ok,note=true,noteLabel="Internal note (optional, never shown to the applicant)";
+  if(k==="decide"){
+    if(a==="approve"){ h="Approve "+spec.ref+"?"; lead="The application is approved and the applicant's training unlocks. They are told at once."; msgLabel="Message to the applicant (optional)"; msg="Your application is approved. You can now start your training."; msgReq=false; ok="Confirm: approve"; }
+    else if(a==="more_info"){ h="Ask "+spec.name+" for more information"; lead="The applicant gets one message with everything below. When they send the fixes, the case comes back to Needs review."; msgLabel="Message to the applicant"; msg=rvMoreMsg(spec.pairs); ok="Confirm: ask for more info"; }
+    else { h="Reject "+spec.ref+"?"; lead="The applicant sees your message as the reason and can appeal. Write it in plain words."; msgLabel="Reason, as the applicant will read it"; ph="For example: Your Class 10 marksheet is from a board we cannot accept. You can apply again with a pass certificate from a recognised board."; ok="Confirm: reject"; }
+  } else if(k==="appeal"){
+    if(o==="overturn"){ h="Overturn the decision and approve?"; lead="The appeal is accepted and the application is approved. The applicant's training unlocks."; msg="We looked at your appeal again and approved your application. You can now start your training."; ok="Confirm: overturn and approve"; }
+    else if(o==="uphold"){ h="Uphold the decision?"; lead="The decision stays. The applicant reads your answer and can appeal again with new information."; ph="Explain in plain words why the decision stays."; ok="Confirm: uphold"; }
+    else { h="Ask for more information on the appeal"; lead="The appeal is answered with your request. The applicant can send another appeal with the information."; ph="Say exactly what the applicant should send or explain."; ok="Confirm: ask for more info"; }
+    msgLabel="Answer to the applicant";
+  } else {
+    h=(spec.decision==="approve"?"Approve ":"Deny ")+spec.name+"?"; lead=(spec.decision==="approve"?"They become a reviewer and can review applications after they next check or sign in. ":"They keep an account but get no reviewer access. ")+spec.email;
+    msgLabel=null; ok=spec.decision==="approve"?"Confirm: approve reviewer":"Confirm: deny request"; note=spec.decision==="deny"; noteLabel="Note (optional, kept for administrators)";
+  }
+  rvDlg.innerHTML='<form class="mbox" id="rvd-form" novalidate><h2 id="rvd-h">'+esc(h)+'</h2><p>'+esc(lead)+'</p><div class="errsum" id="rvd-err" role="alert" tabindex="-1" hidden></div>'+
+    (k==="decide"&&a==="more_info"?'<div id="rvd-pw">'+rvPairsHtml()+'</div>':'')+
+    (msgLabel?'<label for="rvd-msg">'+esc(msgLabel)+'</label><textarea id="rvd-msg" maxlength="600"'+(msgReq?' required aria-required="true"':'')+' placeholder="'+esc(ph)+'" aria-describedby="rvd-mh">'+esc(msg)+'</textarea><p class="hint" id="rvd-mh">Up to 600 characters. No ID numbers, and no accusing words.</p>':'')+
+    (note?'<label for="rvd-note">'+esc(noteLabel)+'</label><textarea id="rvd-note" maxlength="'+(k==="req"?500:1500)+'"></textarea>':'')+
+    '<div class="actions"><button class="btn" type="button" data-rvd="cancel">Cancel</button><button class="btn pri" type="submit" id="rvd-ok">'+esc(ok)+'</button></div></form>';
+  rvDlg.showModal();
+  var f=rvDlg.querySelector(k==="decide"&&a==="more_info"?"#rvd-pairs input":"textarea")||$("rvd-ok"); if(f) f.focus();
+}
+rvDlg.addEventListener("close",function(){ var p=RVD&&RVD.prev; RVD=null; if(p&&p.focus&&document.body.contains(p)) try{ p.focus(); }catch(e){} });
+rvDlg.addEventListener("click",function(e){ if(e.target&&e.target.closest&&e.target.closest('[data-rvd="cancel"]')) rvDlg.close(); });
+rvDlg.addEventListener("input",function(e){ if(RVD&&e.target&&e.target.id==="rvd-msg") RVD.dirty=true; });
+rvDlg.addEventListener("change",function(e){
+  var t=e.target; if(!RVD||!t) return;
+  if(t.hasAttribute("data-pair")){ RVD.pairs[Number(t.getAttribute("data-pair"))].on=t.checked; }
+  else if(t.id==="rvd-add"&&t.value){ var dk=t.value; if(!RVD.pairs.some(function(p){return p.doc===dk&&p.issue==="REUPLOAD"})) RVD.pairs.push({doc:dk,issue:"REUPLOAD",on:true}); $("rvd-pw").innerHTML=rvPairsHtml(); var nb=rvDlg.querySelector('[data-pair="'+(RVD.pairs.length-1)+'"]'); if(nb) nb.focus(); }
+  else return;
+  if(!RVD.dirty&&$("rvd-msg")) $("rvd-msg").value=rvMoreMsg(RVD.pairs);
+});
+rvDlg.addEventListener("submit",function(e){ e.preventDefault(); rvDlgSubmit(); });
+function rvDlgErr(msg,id){ var er=$("rvd-err"); if(!er) return; er.hidden=false; er.textContent=msg; var f=id&&$(id); if(f&&f.tagName==="TEXTAREA"){ f.setAttribute("aria-invalid","true"); f.setAttribute("aria-describedby","rvd-err rvd-mh"); } er.focus(); }
+function rvDlgSubmit(){
+  var sp=RVD; if(!sp||sp.busy) return;
+  var me=$("rvd-msg"),ne=$("rvd-note"),msg=me?me.value.trim():"",note=ne?ne.value.trim():"",path,body;
+  if(me&&ID_RE.test(msg)) return rvDlgErr(RV_ERR.id_number.replace("{field}","message"),"rvd-msg");
+  if(ne&&ID_RE.test(note)) return rvDlgErr(RV_ERR.id_number.replace("{field}","internal note"),"rvd-note");
+  if(sp.kind==="decide"){
+    if(sp.action==="more_info"&&!sp.pairs.some(function(p){return p.on})) return rvDlgErr("Choose at least one document to ask for.","rvd-pairs");
+    if(sp.action!=="approve"&&!msg) return rvDlgErr("Write a message to the applicant.","rvd-msg");
+    body={action:sp.action,message:msg}; if(note) body.note=note;
+    if(sp.action==="more_info") body.items=sp.pairs.filter(function(p){return p.on}).map(function(p){return {doc:p.doc,issue:p.issue}});
+    path="/api/reviewer/applications/"+encodeURIComponent(sp.ref)+"/decision";
+  } else if(sp.kind==="appeal"){
+    if(!msg) return rvDlgErr("Write an answer to the applicant.","rvd-msg");
+    body={outcome:sp.outcome,message:msg}; if(note) body.note=note; path="/api/reviewer/appeals/"+encodeURIComponent(sp.id)+"/resolve";
+  } else { body={id:sp.id,decision:sp.decision}; if(note) body.note=note; path="/api/admin/reviewer-requests/decide"; }
+  sp.busy=true; var bs=rvDlg.querySelectorAll("button"); bs.forEach(function(b){b.disabled=true});
+  accountRequest(path,body).then(function(){
+    rvDlg.close();
+    if(sp.kind==="req"){ rvToast(sp.decision==="approve"?"Reviewer approved":"Request denied",sp.name+(sp.decision==="approve"?" can now review applications.":" has no reviewer access.")); reqLoad(); focusHead("req"); return; }
+    var what=sp.kind==="appeal"?{overturn:"Appeal accepted, application approved",uphold:"Decision upheld",more_info:"More information requested"}[sp.outcome]:{approve:"Application approved",reject:"Application rejected",more_info:"More information requested"}[sp.action];
+    rvToast(what,sp.ref+" · the applicant has been told.");
+    RV.list.state="loading"; if(location.hash==="#review"){ RV.sel=null; rvLoad(); } else location.hash="#review";
+  }).catch(function(e){
+    sp.busy=false; bs.forEach(function(b){b.disabled=false}); rvDlgErr(rvErrText(e));
+    if(e&&e.status===409){ if(sp.kind==="req") reqLoad(); else if(RV.sel) rvDetLoad(RV.sel); }
+  });
+}
+function rvOpenDecide(action,trigger){
+  var d=RV.det.data; if(RV.det.state!=="ok"||!d) return;
+  rvDlgOpen({kind:"decide",action:action,ref:d.reference,name:d.display_name||"the applicant",pairs:action==="more_info"?rvPairs(d):[]},trigger);
+}
+function rvClick(t,a){
+  if(a==="rvc-tab"){ RV.tab=t.getAttribute("data-tab")||"needs_review"; RV.list={state:"loading",items:[],counts:RV.list.counts}; rvLoad(true); var b=document.querySelector('[data-act="rvc-tab"][data-tab="'+RV.tab+'"]'); if(b) b.focus(); return true; }
+  if(a==="rvc-retry"){ RV.list.state="loading"; RV.apl.state="loading"; rvLoad(); return true; }
+  if(a==="rvc-dretry"){ RV.det.state="loading"; rvDetLoad(RV.sel); return true; }
+  if(a==="rvc-decide"){ rvOpenDecide(t.getAttribute("data-rvact"),t); return true; }
+  if(a==="rvc-appeal"){ var d=RV.det.data; if(d) rvDlgOpen({kind:"appeal",outcome:t.getAttribute("data-outcome"),id:t.getAttribute("data-apid"),ref:d.reference,name:d.display_name},t); return true; }
+  if(a==="req-tab"){ REQ.tab=t.getAttribute("data-tab")==="all"?"all":"pending"; REQ.state="loading"; reqLoad(); var rb=document.querySelector('[data-act="req-tab"][data-tab="'+REQ.tab+'"]'); if(rb) rb.focus(); return true; }
+  if(a==="req-retry"){ REQ.state="loading"; reqLoad(); return true; }
+  if(a==="req-act"){ var id=t.getAttribute("data-id"),r=REQ.items.filter(function(x){return x.id===id})[0]; if(r) rvDlgOpen({kind:"req",id:id,decision:t.getAttribute("data-dec"),name:r.display_name||"This person",email:r.email||""},t); return true; }
+  return false;
+}
+/* ---- administrator: reviewer requests ---- */
+function reqLoad(){
+  if(!ACCOUNT||!canSee("req")) return;
+  var seq=++REQ.seq; if(REQ.state!=="ok") REQ.state="loading"; if(VIEW==="req") renderReq();
+  accountRequest("/api/admin/reviewer-requests?status="+(REQ.tab==="all"?"all":"pending")).then(function(d){ if(seq===REQ.seq){ REQ.items=(d&&d.items)||[]; REQ.state="ok"; } })
+    .catch(function(e){ if(seq===REQ.seq){ REQ.items=[]; REQ.state=rvErrState(e); } }).then(function(){ if(seq===REQ.seq&&VIEW==="req") renderReq(); });
+}
+function renderReq(){
+  var tabs=[["pending","Pending"],["all","All"]].map(function(x){ return '<button type="button" data-act="req-tab" data-tab="'+x[0]+'" aria-pressed="'+(REQ.tab===x[0])+'">'+x[1]+(x[0]==="pending"&&REQ.tab==="pending"&&REQ.state==="ok"?' <span class="cnt">'+REQ.items.length+'</span>':'')+'</button>'; }).join("");
+  var body=rvState(REQ.state,"reviewer requests","req-retry","Only administrators can see reviewer requests.");
+  if(!body) body=!REQ.items.length?'<div class="empty">'+(REQ.tab==="pending"?"No reviewer requests are waiting.":"No reviewer requests yet.")+'</div>':
+    '<ul class="rvlist" aria-label="Reviewer requests">'+REQ.items.map(function(r){
+      var pend=r.status==="pending",chip=pend?'<span class="chip w">Pending</span>':r.status==="approved"?'<span class="chip">Approved</span>':'<span class="chip b">Denied</span>';
+      return '<li><div class="rvrow"><span class="rf"><b>'+esc(r.display_name||"No name")+'</b><span class="small muted">'+esc(r.email||"")+'</span></span><span class="rm">'+chip+'<span class="small muted">Requested '+esc(rvAt(r.created_at))+(r.decided_at?' · decided '+esc(rvAt(r.decided_at)):'')+'</span></span>'+
+        (pend?'<span class="rvacts"><button class="btn pri sm" type="button" data-act="req-act" data-dec="approve" data-id="'+esc(r.id)+'" aria-label="Approve '+esc(r.display_name||"")+' as a reviewer">Approve</button><button class="btn sm" type="button" data-act="req-act" data-dec="deny" data-id="'+esc(r.id)+'" aria-label="Deny the request from '+esc(r.display_name||"")+'">Deny</button></span>':'<span></span>')+'</div></li>';
+    }).join("")+'</ul>';
+  setHtml($("view-req"),'<div class="rvc"><div class="hello"><div><h1>Reviewer requests</h1><p class="muted">People who signed up as reviewers. Approve only people who should review applications. An approved reviewer gets access when they next check or sign in.</p></div></div><div class="rvtabs" role="group" aria-label="Request status">'+tabs+'</div>'+body+'</div>');
+}
+/* ---- waiting page for a reviewer request ---- */
+function waitLoad(){ if(!ACCOUNT) return; accountRequest("/api/me").then(function(d){ if(d&&d.user&&ACCOUNT){ ACCOUNT=Object.assign(ACCOUNT,d.user); if(VIEW==="wait") render(); } }).catch(function(){}); }
+function renderWait(){
+  lpChrome();
+  var rq=(ACCOUNT&&ACCOUNT.reviewer_request)||{},den=rq.status==="denied";
+  setHtml($("lp-main"),'<section class="lp-in" aria-labelledby="wait-h"><div class="box wait-box"><h1 id="wait-h" tabindex="-1">'+TE(den?"wait.denied.title":"wait.title")+'</h1><p>'+TE(den?"wait.denied.body":"wait.body")+'</p>'+
+    '<p class="small muted">'+TE("wait.as",{email:ACCOUNT&&ACCOUNT.email?ACCOUNT.email:""})+(rq.created_at?' · '+TE("wait.requested",{time:M_fmtClock(rq.created_at*1000,LANG)}):'')+(den&&rq.decided_at?' · '+TE("wait.decided",{time:M_fmtClock(rq.decided_at*1000,LANG)}):'')+'</p>'+
+    '<p class="small" id="wait-msg" role="status">'+(WAIT.msg?TE(WAIT.msg):'')+'</p>'+
+    '<div class="actions" style="justify-content:flex-start">'+(den?'':'<button class="btn pri" type="button" data-act="wait-check"'+(WAIT.busy?' disabled':'')+'>'+TE("wait.check")+'</button>')+'<button class="btn" type="button" data-act="wait-out">'+TE("acct.signout")+'</button></div></div></section>');
+}
+/* Approval bumps the account's token version, so a refresh picks up the new role (planning/REVIEWER_API.md). */
+function waitCheck(quiet){
+  if(WAIT.busy||!ACCOUNT) return; WAIT.busy=true; if(!quiet){ WAIT.msg="wait.checking"; render(); }
+  accountRequest("/api/auth/refresh",{},false).then(function(d){
+    var u=d&&d.user; WAIT.busy=false;
+    if(u&&u.role&&u.role!=="reviewer_pending"){ WAIT.msg=""; announce(T("wait.approved")); enterAccount(u); return; }
+    return accountRequest("/api/me").then(function(m){ if(m&&m.user&&ACCOUNT) ACCOUNT=Object.assign(ACCOUNT,m.user); if(!quiet){ WAIT.msg="wait.still"; announce(T("wait.still")); } render(); });
+  }).catch(function(){ WAIT.busy=false; if(!quiet){ WAIT.msg="ui.error"; render(); } });
+}
+setInterval(function(){ if(VIEW==="wait"&&ACCOUNT&&!document.hidden) waitCheck(true); },60000);
+/* ---- the applicant side of a reviewer's decision ---- */
+var RV_PRE=["DRAFT","SUBMITTED","IN_REVIEW","NEEDS_MORE_INFO","HUMAN_REVIEW","REJECTED"];
+function rvApply(rv){
+  if(!rv||!ACCOUNT||ACCOUNT.role!=="applicant"||!S.reached||!S.reached.SUBMITTED||S.rechecking) return;
+  var sig=rv.action+"|"+rv.at+"|"+rv.round,isNew=S.rvSig!==sig,pre=RV_PRE.indexOf(S.status)>=0,n=(S.checks||[]).length,was=S.status;
+  if(!pre||(!isNew&&rv.action!=="reject")){ S.rvSig=sig; return; }
+  if(rv.action==="approve"){
+    (S.checks||[]).forEach(function(c){ if(c.res!=="PASS"&&c.res!=="INFO"&&c.res!=="PENDING"){ c.ev0=c.ev0||c.ev; c.res="PASS"; c.reviewer=true; c.ev=(c.ev||"")+" · confirmed by a reviewer"; } });
+    S.decision="APPROVE"; S.disputed=false; S.review=null; S.fu=null; S.rej=null; S.rvOpen=false; S.step=2; S.shown=n; S.touches=(S.touches||0)+1;
+    setState("KYC_APPROVED"); log("KYC_APPROVED","REVIEWER","A reviewer approved the application");
+    S.rounds.push({round:S.round,decision:"APPROVE",t:Date.now(),items:[],rechecked:0,carried:n,changed:[],by:"reviewer"});
+    cheer(T("rv.cheer.ok.t"),T("rv.cheer.ok.b"),"star");
+  } else if(rv.action==="reject"){
+    if(!isNew&&S.status==="REJECTED"&&(S.rej||[]).some(function(r){return r.code==="REVIEWER"})) return;
+    S.decision="REJECT"; S.rej=[{en:String(rv.message||""),hi:String(rv.message||""),code:"REVIEWER"}]; S.disputed=false; S.review=null; S.fu=null; S.rvOpen=false; S.step=2; S.shown=n; S.touches=Math.max(1,S.touches|0);
+    setState("REJECTED"); log("DECISION","REVIEWER","Decision REJECT by a reviewer · applicant told in plain words"); APL.state="idle";
+    if(isNew&&was!=="REJECTED") cheer(T("rv.cheer.no.t"),T("rv.cheer.no.b"),"heart");
+  } else if(rv.action==="more_info"){
+    if((S.round|0)>(rv.round|0)){ S.rvSig=sig; return; } /* the fixes were already sent */
+    var items=(rv.items||[]).filter(function(i){return M_DOC_KEYS.indexOf(i.doc)>=0}).map(function(i){
+      return {key:i.doc,code:i.issue,rv:1,en:t("rv.item",{docKey:"doc."+i.doc,issue:issLabel(i.issue,"en")},"en"),hi:t("rv.item",{docKey:"doc."+i.doc,issue:issLabel(i.issue,"hi")},"hi")}; });
+    S.fu={items:items,round:S.round,rv:{message:String(rv.message||""),at:rv.at}}; S.changed={}; S.rvOpen=true; S.decision="NEEDS_MORE_INFO"; S.step=2; S.shown=n; S.rechecking=false;
+    S.followups=(S.followups||0)+1; S.touches=(S.touches||0)+1; items.forEach(function(i){ S.specv[i.key]="clean"; });
+    setState("NEEDS_MORE_INFO"); log("FOLLOWUP_SENT","REVIEWER","Round "+S.round+" · a reviewer asked for "+items.length+" item"+(items.length===1?"":"s")+" in one message");
+    if(was!=="NEEDS_MORE_INFO") cheer(T("rv.cheer.more.t"),T("rv.cheer.more.b"),"heart");
+  }
+  S.rvSig=sig; render(); syncMark();
+}
+function rvRefresh(){
+  if(!ACCOUNT||ACCOUNT.role!=="applicant") return;
+  accountRequest("/api/applications/me").then(function(d){ if(d&&d.application) rvApply(d.application.review); aplLoad(); }).catch(function(){});
+}
+/* A new review.* or appeal.* notification means a person acted: fetch the decision and the appeal outcome. */
+function rvNotifHook(items){
+  if(!ACCOUNT||ACCOUNT.role!=="applicant") return;
+  var mx=0; (items||[]).forEach(function(n){ if(/^(review|appeal)\./.test(String(n.key||""))&&n.id>mx) mx=n.id; });
+  if(RVN===null){ RVN=mx; return; }
+  if(mx>RVN){ RVN=mx; rvRefresh(); }
+}
 var RESTORED=restore(),RESET_HASH=location.hash.indexOf('#reset=')===0?location.hash:'';
 applyTheme(); applyLang();
 /* Signed-out visitors land on #welcome. The production build holds a deep link until the session check says who is there (enterAccount then opens it). */
