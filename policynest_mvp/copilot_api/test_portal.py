@@ -42,7 +42,7 @@ class PortalBase(unittest.TestCase):
 
     def setUp(self):
         test_auth.AuthStoreTest.setUp(self)  # fresh database
-        main._hits.clear()
+        main._hits.clear();main._auth_hits.clear()
         main._global.clear()
         main._day.update(date='', n=0)
 

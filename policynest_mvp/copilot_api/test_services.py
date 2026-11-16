@@ -54,7 +54,7 @@ class AssistantHTTP(unittest.TestCase):
 
     def setUp(self):
         test_auth.AuthStoreTest.setUp(self)
-        test_main.main._hits.clear();test_main.main._global.clear()
+        test_main.main._hits.clear();test_main.main._auth_hits.clear();test_main.main._global.clear()
         def offline(kw): raise RuntimeError('offline')
         test_main.main.call_model=offline  # exercise the deterministic path; the AI path has its own tests (test_assistant.py)
         self.opener=urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))

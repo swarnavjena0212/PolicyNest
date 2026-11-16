@@ -41,7 +41,7 @@ class ProxyContract(unittest.TestCase):
 
     def setUp(self):
         CALLS.clear()
-        main._hits.clear()
+        main._hits.clear();main._auth_hits.clear()
         main._global.clear()
         main._day.update(date="", n=0)
         main.call_model = fake_model()
@@ -175,3 +175,18 @@ class ProxyContract(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class SignOutNeverLimited(unittest.TestCase):
+    """16 Nov: sign-out was refused with 429 when the shared question budget was used up, so a reload signed people back in."""
+
+    def test_logout_and_auth_do_not_share_the_question_budget(self):
+        import main as m, time
+        m._hits.clear(); m._auth_hits.clear(); m._global.clear()
+        m._global.extend([time.time()] * (m.GLOBAL_PER_MIN + 5))  # the Copilot's global cap is exhausted
+        self.assertFalse(m._auth_limited("auth:1.2.3.4", *m.AUTH_RATE))
+        for _ in range(m.AUTH_RATE[0] + 5):
+            m._auth_limited("auth:1.2.3.4", *m.AUTH_RATE)
+        self.assertTrue(m._auth_limited("auth:1.2.3.4", *m.AUTH_RATE))
+        self.assertFalse(m._auth_limited("refresh:1.2.3.4", *m.REFRESH_RATE))  # separate bucket
+        m._global.clear(); m._auth_hits.clear()

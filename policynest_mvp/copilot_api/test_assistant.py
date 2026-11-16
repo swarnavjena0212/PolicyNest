@@ -208,7 +208,7 @@ class AssistantHTTP(unittest.TestCase):
 
     def setUp(self):
         test_auth.AuthStoreTest.setUp(self)
-        main._hits.clear()
+        main._hits.clear();main._auth_hits.clear()
         main._global.clear()
         main._day.update(date="", n=0)
         self.calls = []
