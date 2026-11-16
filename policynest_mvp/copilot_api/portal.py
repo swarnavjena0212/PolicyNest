@@ -37,6 +37,10 @@ def init():
           id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, type TEXT NOT NULL, key TEXT NOT NULL,
           stage TEXT NOT NULL DEFAULT '', doc TEXT NOT NULL DEFAULT '', action TEXT NOT NULL DEFAULT '',
           read INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL, reference TEXT NOT NULL DEFAULT '')""")
+        cols = {r[1] for r in db.execute('PRAGMA table_info(applications)')}
+        for name in ('submitted_at', 'last_submitted_at'):  # when it first / last reached a reviewable state (server time)
+            if name not in cols:
+                db.execute('ALTER TABLE applications ADD COLUMN ' + name + ' INTEGER')
         db.execute('CREATE INDEX IF NOT EXISTS timeline_user ON timeline(user_id, t)')
         db.execute('CREATE INDEX IF NOT EXISTS notif_user ON notifications(user_id, read, created_at)')
 
@@ -74,9 +78,17 @@ def public_profile(row):
 def get_profile(user):
     with auth._db() as db:
         row = db.execute('SELECT * FROM users WHERE id=?', (user['id'],)).fetchone()
+        try:
+            req = db.execute('SELECT status,created_at,decided_at FROM reviewer_requests WHERE user_id=?', (user['id'],)).fetchone()
+        except sqlite3.OperationalError:  # no reviewer request has ever been made on this database
+            req = None
     if not row:
         raise PortalError(401, 'unauthenticated')
-    return {'user': public_profile(row)}
+    out = public_profile(row)
+    if req or row['role'] == 'reviewer_pending':
+        # status only: the admin's note and identity are never shown to the requester
+        out['reviewer_request'] = {'status': req['status'], 'created_at': req['created_at'], 'decided_at': req['decided_at']} if req else {'status': 'pending', 'created_at': None, 'decided_at': None}
+    return {'user': out}
 
 
 def patch_profile(user, body):
@@ -260,6 +272,14 @@ def clean_progress(value):
     return out
 
 
+SUBMITTED_STAGES = ('verification', 'training', 'exam', 'certificate')
+
+
+def is_submitted(progress):
+    """Submitted: the engine reported a decision, or the journey reached verification or later."""
+    return progress.get('decision') is not None or str(progress.get('stage') or '').strip().lower() in SUBMITTED_STAGES
+
+
 def derive_status(progress):
     if progress.get('certificate', {}).get('code'):
         return 'CERTIFIED'
@@ -287,15 +307,25 @@ def _new_reference():
     return 'PN-%d-%05d' % (time.gmtime().tm_year, secrets.randbelow(100000))
 
 
+def _with_review(db, row):
+    """The applicant's view of the latest reviewer decision (never the note or who decided)."""
+    import reviewer  # late import: reviewer builds on this module
+    out = _public_app(row)
+    out['review'] = reviewer.applicant_review(db, row['user_id'])
+    return out
+
+
 def create_application(user):
     _applicant(user)
     init()
     now = int(time.time())
+    import reviewer
+    reviewer.init()
     with auth._db() as db:
         for _ in range(30):
             row = db.execute('SELECT * FROM applications WHERE user_id=?', (user['id'],)).fetchone()
             if row:
-                return _public_app(row)
+                return _with_review(db, row)
             try:
                 db.execute('INSERT INTO applications(user_id,reference,created_at,updated_at) VALUES(?,?,?,?)',
                            (user['id'], _new_reference(), now, now))
@@ -307,11 +337,13 @@ def create_application(user):
 def get_application(user):
     _applicant(user)
     init()
+    import reviewer
+    reviewer.init()
     with auth._db() as db:
         row = db.execute('SELECT * FROM applications WHERE user_id=?', (user['id'],)).fetchone()
-    if not row:
-        raise PortalError(404, 'no_application')
-    return _public_app(row)
+        if not row:
+            raise PortalError(404, 'no_application')
+        return _with_review(db, row)
 
 
 def put_application(user, body):
@@ -326,15 +358,22 @@ def put_application(user, body):
             raise PortalError(404, 'no_application')
         stored_details = json.loads(row['details'])
         details = clean_details(body['details'], stored_details) if 'details' in body else stored_details
-        progress = clean_progress(body['progress']) if 'progress' in body else json.loads(row['progress'])
+        old_progress = json.loads(row['progress'])
+        progress = clean_progress(body['progress']) if 'progress' in body else old_progress
         now = int(time.time())
+        submitted_at, last_submitted = row['submitted_at'], row['last_submitted_at']
+        if is_submitted(progress):
+            submitted_at = submitted_at or now
+            # a new round or a new engine decision is a (re)submission; other saves leave the time alone
+            if not last_submitted or (progress.get('round'), progress.get('decision')) != (old_progress.get('round'), old_progress.get('decision')):
+                last_submitted = now
         changed = db.execute(
-            'UPDATE applications SET version=version+1,details=?,progress=?,status=?,updated_at=? WHERE user_id=? AND version=?',
+            'UPDATE applications SET version=version+1,details=?,progress=?,status=?,updated_at=?,submitted_at=?,last_submitted_at=? WHERE user_id=? AND version=?',
             (json.dumps(details, separators=(',', ':')), json.dumps(progress, separators=(',', ':')),
-             derive_status(progress), now, user['id'], version)).rowcount
+             derive_status(progress), now, submitted_at, last_submitted, user['id'], version)).rowcount
         if not changed:
             current = db.execute('SELECT * FROM applications WHERE user_id=?', (user['id'],)).fetchone()
-            raise PortalError(409, 'stale', application=_public_app(current))
+            raise PortalError(409, 'stale', application=_with_review(db, current))
     return {'version': version + 1, 'updated_at': now}
 
 
@@ -368,6 +407,13 @@ REVIEWER_EVENTS = {
     'review_rejected': ('reviewer', 'info', '#history'),
     'review_in_progress': ('reviewer', 'info', '#history'),
     'appeal_update': ('reviewer', 'info', '#history'),
+    # reviewer workspace (reviewer.py): keys only; the applicant reads the message through GET /api/applications/me
+    'review.approved': ('reviewer', 'success', '#home'),
+    'review.rejected': ('reviewer', 'info', '#history'),
+    'review.more_info': ('reviewer', 'action', '#documents'),
+    'appeal.upheld': ('reviewer', 'info', '#history'),
+    'appeal.overturned': ('reviewer', 'success', '#home'),
+    'appeal.more_info': ('reviewer', 'action', '#history'),
 }
 TIMELINE_KEEP = 500
 NOTIFICATIONS_KEEP = 200

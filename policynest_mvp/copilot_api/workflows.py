@@ -67,12 +67,23 @@ def appeals(actor, case_id, explanation=None):
         if explanation is not None:
             if not isinstance(explanation, str) or not 10 <= len(explanation) <= 1500: raise ValueError('invalid_explanation')
             if re.search(r'\b\d{4}\s?\d{4}\s?\d{4}\b|\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{9,18}\b', explanation): raise ValueError('do_not_include_identity_numbers')
+            if db.execute("SELECT 1 FROM appeals WHERE case_id=? AND status='OPEN'", (case_id,)).fetchone(): raise ValueError('appeal_open')
             reference = 'AP-' + secrets.token_hex(8)
             stored=db.execute('SELECT snapshot FROM application_snapshots WHERE user_id=?',(actor['id'],)).fetchone()
-            db.execute('INSERT INTO appeals(id,case_id,explanation,status,created,evidence) VALUES(?,?,?,?,?,?)', (reference, case_id, explanation, 'OPEN', int(time.time()),stored['snapshot'] if stored else '{}'))
+            evidence=stored['snapshot'] if stored else _portal_evidence(db, actor['id'])
+            db.execute('INSERT INTO appeals(id,case_id,explanation,status,created,evidence) VALUES(?,?,?,?,?,?)', (reference, case_id, explanation, 'OPEN', int(time.time()),evidence))
             _audit(db, case_id, actor, 'APPEAL_SUBMITTED')
             return {'reference': reference, 'status': 'OPEN'}
         return [dict(r) for r in db.execute('SELECT id,status,explanation,response,created,resolved,evidence FROM appeals WHERE case_id=?', (case_id,))]
+
+
+def _portal_evidence(db, user_id):
+    """Allow-listed evidence from the portal application: decision, round and per-slot statuses and issue codes only."""
+    row = db.execute('SELECT progress FROM applications WHERE user_id=?', (user_id,)).fetchone()
+    if not row: return '{}'
+    p = json.loads(row['progress'] or '{}')
+    docs = {k: {'status': v.get('status'), 'issues': v.get('issues', [])} for k, v in (p.get('documents') or {}).items() if isinstance(v, dict)}
+    return json.dumps({'decision': p.get('decision'), 'round': p.get('round'), 'documents': docs}, separators=(',', ':'))
 
 
 def resolve(actor, reference, status, response):
@@ -83,7 +94,7 @@ def resolve(actor, reference, status, response):
         row = db.execute('SELECT c.* FROM cases c JOIN appeals a ON a.case_id=c.id WHERE a.id=?', (reference,)).fetchone()
         if not row or not policy.allows(actor, 'appeal.resolve', dict(row)): raise ValueError('forbidden')
         current=db.execute('SELECT status FROM appeals WHERE id=?',(reference,)).fetchone()
-        if current['status']=='RESOLVED':raise ValueError('already_resolved')
+        if current['status']!='OPEN':raise ValueError('already_resolved')  # any outcome is final: no second resolution
         db.execute('UPDATE appeals SET status=?,response=?,resolved=? WHERE id=?', (status,response,int(time.time()),reference))
         _audit(db,row['id'],actor,'APPEAL_'+status)
         portal.record_reviewer_event(db,row['applicant_id'],'appeal_update')  # key only: no response text

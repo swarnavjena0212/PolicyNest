@@ -34,6 +34,12 @@ _OUTCOME = re.compile(
 _NEGATED = re.compile(r"\b(cannot|can't|can’t|can not|not able|unable|won't|don't|do not|doesn't|no one can)\b|नहीं", re.I)
 
 
+def fraud_wording(text):
+    """True if the text uses fraud wording (or the wrong pass mark). Used for reviewer messages to applicants,
+    which may legitimately state an outcome but must never accuse anyone."""
+    return bool(_WORDS.search(str(text or "")))
+
+
 def violates(text):
     """True if the text uses banned words, the wrong pass mark, or claims an outcome in a sentence that is not negated."""
     t = str(text or "")

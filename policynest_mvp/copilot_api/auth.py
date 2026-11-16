@@ -95,7 +95,14 @@ def _public(row):
     return {"id": int(row["id"]), "email": row["email"], "display_name": row["display_name"], "role": row["role"]}
 
 
-def register(email, password, display_name):
+REGISTRABLE_ROLES = ("applicant", "reviewer_pending", "admin")  # reviewer and ops are never granted at registration
+
+
+def register(email, password, display_name, role="applicant", after_insert=None):
+    """Create an account. role is chosen by the server (reviewer.register_account), never taken from input;
+    reviewer power needs an admin's approval. after_insert(db, user_id) runs in the same transaction."""
+    if role not in REGISTRABLE_ROLES:
+        raise ValueError("invalid_role")
     _secret()  # fail before inserting an account when authentication is not configured
     email = str(email or "").strip().lower()
     display_name = str(display_name or "").strip()
@@ -104,7 +111,9 @@ def register(email, password, display_name):
     try:
         with _db() as db:
             cur = db.execute("INSERT INTO users(email, display_name, password_hash, role, created_at) VALUES(?,?,?,?,?)",
-                             (email, display_name, _hash(password), "applicant", int(time.time())))
+                             (email, display_name, _hash(password), role, int(time.time())))
+            if after_insert:
+                after_insert(db, cur.lastrowid)
             row = db.execute("SELECT * FROM users WHERE id=?", (cur.lastrowid,)).fetchone()
     except sqlite3.IntegrityError:
         raise ValueError("email_taken")

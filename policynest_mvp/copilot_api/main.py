@@ -32,6 +32,7 @@ import auth
 import policy
 import portal
 import workflows
+import reviewer
 import application_state
 import rag
 import llm
@@ -309,7 +310,7 @@ class H(BaseHTTPRequestHandler):
         self.end_headers()
         try:
             route=urlsplit(self.path).path
-            known=route if route in ('/api/auth/login','/api/auth/register','/api/auth/refresh','/api/auth/logout','/api/assistant','/api/appeals','/api/applications/me','/api/copilot','/api/me','/api/notifications','/api/notifications/read','/api/applications/me/events','/api/applications/me/timeline','/api/events','/api/telemetry') else '/api/other'
+            known=reviewer.template(route) or (route if route in ('/api/auth/login','/api/auth/register','/api/auth/refresh','/api/auth/logout','/api/assistant','/api/appeals','/api/applications/me','/api/copilot','/api/me','/api/notifications','/api/notifications/read','/api/applications/me/events','/api/applications/me/timeline','/api/events','/api/telemetry') else '/api/other')
             elapsed=(time.perf_counter()-self._started)*1000
             telemetry.technical(known,code,elapsed,self._request_id)
             if os.environ.get('STRUCTURED_LOGS')=='1':print(json.dumps({'request_id':self._request_id,'route':known,'status':code,'latency_ms':round(elapsed,2)}),flush=True)
@@ -324,6 +325,7 @@ class H(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed=urlsplit(self.path);params=parse_qs(parsed.query);self.path=parsed.path
         legacy=self.path=='/api/applications/me' and params.get('view',[''])[0]=='snapshot'
+        if self._reviewer('GET',None,params):return
         if not legacy and self._portal('GET',None,params):return
         if self.path=='/api/reviewer/case':
             try:return self._json(200,workflows.case_detail(self._identity(),params.get('id',[''])[0]))
@@ -376,6 +378,7 @@ class H(BaseHTTPRequestHandler):
             return self._json(400, {"error": "bad_json"})
         if not isinstance(body, dict):
             return self._json(400, {"error": "schema"})
+        if self._reviewer('POST',body,{}):return
         if not (self.path=='/api/applications/me' and 'snapshot' in body) and self._portal('POST',body,{}):return
         if self.path=='/api/reviewer/decide':
             try:return self._json(200,workflows.review(self._identity(),body.get('case_id'),body.get('status'),body.get('note'),body.get('rule')))
@@ -401,12 +404,20 @@ class H(BaseHTTPRequestHandler):
                 user = self._identity()
                 if self.path == '/api/appeals':
                     case = workflows.own_case(user)
-                    return self._json(201, workflows.appeals(user, case['id'], body.get('explanation')))
+                    try:
+                        return self._json(201, workflows.appeals(user, case['id'], body.get('explanation')))
+                    except ValueError as e:
+                        code = {'do_not_include_identity_numbers': (400, 'id_number'), 'invalid_explanation': (400, 'invalid_explanation'),
+                                'appeal_open': (409, 'appeal_open')}.get(str(e))
+                        if code: return self._json(code[0], {'error': code[1]})
+                        raise
                 if self.path == '/api/admin/assign':
                     workflows.assign(user, body.get('case_id'), body.get('reviewer_id'))
                     return self._json(200, {'ok': True})
                 return self._json(200, workflows.resolve(user, body.get('reference'), body.get('status'), body.get('response')))
-            except ValueError: return self._json(403, {'error': 'forbidden_or_invalid_request'})
+            except ValueError as e:
+                if str(e) == 'already_resolved': return self._json(409, {'error': 'already_resolved'})
+                return self._json(403, {'error': 'forbidden_or_invalid_request'})
         if self.path.startswith("/api/auth/") and _limited(_client(self)):
             return self._json(429, {"error": "rate_limited"})
         if self.path == "/api/auth/refresh":
@@ -433,8 +444,9 @@ class H(BaseHTTPRequestHandler):
                 return self._json(400, {"error": "invalid_reset"})
         if self.path == "/api/auth/register":
             try:
-                user = auth.register(body.get("email"), body.get("password"), body.get("display_name"))
+                user = reviewer.register_account(body, _client(self))
                 return self._session(201, user, auth.new_refresh(user))
+            except portal.PortalError as e: return self._json(e.status, e.payload)
             except ValueError as e: return self._json(400 if str(e) != "email_taken" else 409, {"error": str(e)})
         if self.path == "/api/auth/login":
             try:
@@ -553,6 +565,23 @@ class H(BaseHTTPRequestHandler):
         try:
             code, out = route(user, body if isinstance(body, dict) else {}, params)
             self._json(code, out)
+        except portal.PortalError as e:
+            self._json(e.status, e.payload)
+        return True
+
+    def _reviewer(self, method, body, params):
+        """Reviewer workspace and admin routes (reviewer.ROUTES). Returns True when the request was handled."""
+        found = reviewer.match(method, self.path)
+        if not found:
+            return False
+        fn, groups = found
+        try:
+            user = self._identity()
+        except ValueError:
+            self._json(401, {'error': 'unauthenticated'})
+            return True
+        try:
+            self._json(200, fn(user, body if isinstance(body, dict) else {}, params, groups))
         except portal.PortalError as e:
             self._json(e.status, e.payload)
         return True
