@@ -458,8 +458,26 @@ html[data-theme="dark"] .hbar .tr i{background:var(--accent)}
 /* Focused onboarding (optional layout, no timer): sidebar and top bar give way to a slim bar with Save and exit */
 .fbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--night);color:var(--night-ink)}
 .fbar b{font-family:var(--display)} .fbar .fstep{font-size:.84rem;opacity:.8;flex:1;min-width:120px}
-.fbar .ftime{font-family:var(--mono);font-size:1.05rem;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.1);min-width:72px;text-align:center}
-.fbar .ftime.low{background:var(--brand);color:#141414}
+.fbar .ftime{--rc:#d4ff3a;--rc2:#ff6b1a;display:inline-flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.fbar .ftime .ring{position:relative;width:52px;height:52px;flex:none}
+.fbar .ftime svg{width:52px;height:52px;display:block;overflow:visible}
+.fbar .ftime .trk{fill:none;stroke:rgba(255,255,255,.13);stroke-width:5}
+.fbar .ftime .tks line{stroke:rgba(255,255,255,.35);stroke-width:1.4;stroke-linecap:round}
+.fbar .ftime .arc{fill:none;stroke:url(#tm-grad);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .9s linear;filter:drop-shadow(0 0 4px var(--rc))}
+.fbar .ftime .head{fill:#fff;filter:drop-shadow(0 0 5px var(--rc))}
+.fbar .ftime .core{position:absolute;inset:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.35),rgba(255,255,255,.04) 70%);display:grid;place-items:center}
+.fbar .ftime .core i{width:8px;height:8px;border-radius:50%;background:var(--rc);box-shadow:0 0 10px var(--rc);animation:tmBeat 2s ease-in-out infinite}
+.fbar .ftime .tx{display:flex;flex-direction:column;line-height:1.05}
+.fbar .ftime .tnum{font-family:var(--mono);font-size:1.25rem;font-weight:800;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.fbar .ftime .tlab{font-size:.72rem;opacity:.8;text-transform:uppercase;letter-spacing:.08em}
+.fbar .ftime.warn{--rc:#ffb02e;--rc2:#ff6b1a}
+.fbar .ftime.low{--rc:#ff5a3c;--rc2:#ff2d55;background:linear-gradient(135deg,rgba(255,90,60,.28),rgba(255,45,85,.12));border-color:rgba(255,90,60,.55);animation:tmGlow 1.6s ease-in-out infinite}
+.fbar .ftime.done{--rc:#ff2d55;--rc2:#ff2d55}
+@keyframes tmBeat{0%,100%{transform:scale(.8);opacity:.75}50%{transform:scale(1.15);opacity:1}}
+@keyframes tmGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,90,60,.0)}50%{box-shadow:0 0 18px 2px rgba(255,90,60,.45)}}
+@media (prefers-reduced-motion:reduce){.fbar .ftime .core i,.fbar .ftime.low{animation:none}.fbar .ftime .arc{transition:none}}
+@media (max-width:600px){.fbar .ftime .ring,.fbar .ftime svg{width:42px;height:42px}.fbar .ftime .core{inset:11px}.fbar .ftime .tnum{font-size:1.05rem}.fbar .ftime{padding-right:10px;gap:8px}}
+
 .fbar button{font:inherit;font-size:.84rem;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;border-radius:999px;padding:8px 14px;min-height:36px;cursor:pointer}
 .fbar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 body.focus .nav,body.focus .top{display:none} body.focus .shell{grid-template-columns:minmax(0,1fr)} body.focus .main{margin:0;max-width:none}
@@ -3501,9 +3519,27 @@ function timerDraw(){
   bt.hidden=!on; el.hidden=!on||hide;
   var bl=T(hide?"tm.show":"tm.hide"); if(bt.textContent!==bl) bt.textContent=bl;
   if(!on) return;
-  var left=Math.max(0,sitLeft(S.sess)),txt=T("tm.left",{time:mmss(left)});
-  if(el.textContent!==txt) el.textContent=txt;
-  el.classList.toggle("low",left<=300000);
+  var left=Math.max(0,sitLeft(S.sess)),mm=mmss(left),txt=T("tm.left",{time:mm});
+  var total=(SIT_MIN+((S.sess&&S.sess.ext)||0)*SIT_EXT)*60000,f=Math.max(0,Math.min(1,left/total));
+  if(!el.querySelector(".ring")){
+    var C=2*Math.PI*19,tk="";
+    for(var i=0;i<12;i++){ var a=i*Math.PI/6; tk+='<line x1="'+(26+23.5*Math.sin(a)).toFixed(2)+'" y1="'+(26-23.5*Math.cos(a)).toFixed(2)+'" x2="'+(26+25.5*Math.sin(a)).toFixed(2)+'" y2="'+(26-25.5*Math.cos(a)).toFixed(2)+'"/>'; }
+    el.innerHTML='<span class="ring" aria-hidden="true"><svg viewBox="0 0 52 52" focusable="false"><defs><linearGradient id="tm-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--rc)"/><stop offset="1" stop-color="var(--rc2)"/></linearGradient></defs>'+
+      '<g class="tks">'+tk+'</g><circle class="trk" cx="26" cy="26" r="19"/><circle class="arc" cx="26" cy="26" r="19" transform="rotate(-90 26 26)" stroke-dasharray="'+C.toFixed(2)+'" stroke-dashoffset="0"/><circle class="head" cx="26" cy="7" r="3.2"/></svg><span class="core"><i></i></span></span>'+
+      '<span class="tx"><span class="tnum"></span><span class="tlab"></span></span>';
+  }
+  /* The visible text stays exactly the translated "{time} left" sentence: digits in .tnum, the rest in .tlab. */
+  var k=txt.indexOf(mm),pre=k>0?txt.slice(0,k):"",post=k>=0?txt.slice(k+mm.length):"";
+  var nEl=el.querySelector(".tnum"),lEl=el.querySelector(".tlab"),lab=0;
+  if(nEl.textContent!==(pre?pre:"")+mm) nEl.textContent=(pre?pre:"")+mm;
+  if(lEl.textContent!==(post||"")) lEl.textContent=post||"";
+  var C2=2*Math.PI*19,arc=el.querySelector(".arc"),head=el.querySelector(".head"),ang=f*2*Math.PI;
+  arc.setAttribute("stroke-dashoffset",(C2*(1-f)).toFixed(2));
+  head.setAttribute("cx",(26+19*Math.sin(ang)).toFixed(2)); head.setAttribute("cy",(26-19*Math.cos(ang)).toFixed(2));
+  head.style.opacity=f>0?"1":"0";
+  /* Screen readers get a calm minute-level label, not a per-second count. */
+  var al=T("tm.left",{time:Math.ceil(left/60000)+" min"}); if(el.getAttribute("aria-label")!==al) el.setAttribute("aria-label",al);
+  el.classList.toggle("warn",left<=600000&&left>300000); el.classList.toggle("low",left<=300000&&left>0); el.classList.toggle("done",left<=0);
 }
 function tick(){
   var s=S.sess; if(!s){ tickStop(); timerDraw(); return; }
