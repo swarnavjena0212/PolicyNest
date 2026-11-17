@@ -477,6 +477,21 @@ body.focus .nav,body.focus .top{display:none} body.focus .shell{grid-template-co
 dialog#modal{border:0;padding:0;margin:auto;max-width:440px;width:calc(100% - 32px);background:transparent;color:var(--ink);overflow:visible}
 dialog#modal::backdrop{background:rgba(10,10,10,.55)}
 dialog#modal:not([open]){display:none}
+/* Lane VC: voice guide bar and camera check */
+.vgbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px max(16px,env(safe-area-inset-left,0px));background:var(--sunken);color:var(--ink);border-bottom:1px solid var(--line)}
+.vgbar[hidden]{display:none}
+.vg-cap{flex:1 1 220px;min-width:0;margin:0;font-size:.9rem;overflow-wrap:anywhere}
+.vgbar button{font:inherit;font-size:.84rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;min-height:36px;cursor:pointer}
+.vgbar button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.vgbar button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.fbar button[aria-pressed="true"]{background:rgba(255,255,255,.2)}
+dialog#camdlg{border:0;padding:0;margin:auto;max-width:460px;width:calc(100% - 32px);background:transparent;color:var(--ink);overflow:visible}
+dialog#camdlg::backdrop{background:rgba(10,10,10,.55)}
+dialog#camdlg:not([open]){display:none}
+#cam-v{display:block;width:100%;max-height:240px;border-radius:16px;background:#000;object-fit:cover}
+#cam-v[hidden]{display:none}
+#cam-st{font-weight:700;color:var(--ink)}
+#camdlg[data-state="ok"] #cam-st::before{content:"\2713  ";color:var(--ok)}
 .fsbanner{position:fixed;left:16px;right:16px;bottom:16px;z-index:65;max-width:560px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-radius:22px;background:var(--surface);color:var(--ink);box-shadow:0 18px 40px -18px rgba(0,0,0,.45)}
 .fsbanner[hidden]{display:none}
 .fsbanner span{flex:1;min-width:180px}
@@ -720,7 +735,7 @@ body.landing .bnav,body.landing .navscrim,body.landing .mprog{display:none!impor
 @media (prefers-reduced-motion:reduce){.nav{transition:none!important}}
 /* ===== Landing page (public, signed-out) and auth dialogs (lane P3b) ===== */
 body.staff #tb-ref,body.staff #tb-status,body.staff #savestate,body.staff .cp-fab,body.staff #cp{display:none!important}
-body.landing .shell,body.landing .cp-fab,body.landing #cp,body.landing #focusbar,body.landing #fs-banner,body.landing #skip-g{display:none!important}
+body.landing .shell,body.landing .cp-fab,body.landing #cp,body.landing #focusbar,body.landing #vgbar,body.landing #fs-banner,body.landing #skip-g{display:none!important}
 .landing{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
 .landing[hidden]{display:none}
 .lp-in{max-width:1080px;margin:0 auto;width:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -862,7 +877,8 @@ kbd{font-family:var(--mono);font-size:.75rem;border:1px solid currentColor;borde
   </div>
   <div class="tb-row tb-2"><div class="tb-ref" id="tb-ref"></div><span id="tb-status"></span><span id="savestate" role="status" aria-live="polite" aria-atomic="true"></span></div>
 </div></header>
-<div class="fbar" id="focusbar" hidden><b>PolicyNest onboarding</b><span class="fstep" id="fb-step"></span><span class="ftime" id="fb-timer" role="timer" aria-atomic="true" hidden></span><button type="button" id="fb-tt" data-act="fb-timer" hidden>Hide timer</button><button type="button" data-act="cp-open" data-t="cp.fab">Ask Copilot</button><button type="button" data-act="fb-exit" data-t="fb.exit">Save and exit</button></div>
+<div class="fbar" id="focusbar" hidden><b>PolicyNest onboarding</b><span class="fstep" id="fb-step"></span><span class="ftime" id="fb-timer" role="timer" aria-atomic="true" hidden></span><button type="button" id="fb-tt" data-act="fb-timer" hidden>Hide timer</button><button type="button" id="fb-vg" data-act="vg-toggle" aria-pressed="false" data-t="vg.btn" hidden>Voice guide</button><button type="button" data-act="cp-open" data-t="cp.fab">Ask Copilot</button><button type="button" data-act="fb-exit" data-t="fb.exit">Save and exit</button></div>
+<div class="vgbar" id="vgbar" hidden><p class="vg-cap" id="vg-cap" role="status" aria-live="polite"><b data-t="vg.cap.pre">Guide:</b> <span id="vg-txt"></span></p><button type="button" data-act="vg-stop" data-t="vg.stop">Stop</button><button type="button" id="vg-mic" data-act="vg-mic" aria-pressed="false" data-t="vg.mic" hidden>Ask by voice</button><button type="button" id="vg-off" data-act="vg-toggle" aria-pressed="true" data-t="vg.btn">Voice guide</button></div>
 <div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
 <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
 <div class="note syncnote" id="syncnote" role="status" hidden></div>
@@ -891,6 +907,7 @@ kbd{font-family:var(--mono);font-size:.75rem;border:1px solid currentColor;borde
   <div class="cp-chips cp-tools"><button type="button" id="guide-next" data-t="cp.g.next">Show next action</button><button type="button" id="guide-read" data-t="cp.g.read">Read guidance</button><button type="button" id="guide-stop" data-t="cp.g.stop">Stop voice</button><button type="button" id="guide-mic" data-t="cp.g.mic">Ask by voice</button><select id="guide-lang" aria-label="Voice language"><option value="en-IN">English voice</option><option value="hi-IN">Hindi voice</option></select><button type="button" id="guide-appeal" data-t="cp.g.appeal">Ask a human reviewer</button><button type="button" id="guide-helped" data-t="cp.g.helped">This helped resolve my question</button></div>
   <p class="cp-foot" id="cp-foot" data-t="cp.foot">Answers use the PolicyNest rulebook and your progress on this page. The Copilot cannot approve or reject you. Never type your full PAN, Aadhaar or account number here.</p>
 </aside>
+<dialog id="camdlg" aria-labelledby="cam-h" aria-describedby="cam-lead"><div class="mbox"><h2 id="cam-h" data-t="cam.h">Check your camera</h2><p id="cam-lead" data-t="cam.lead">See that your camera works before you take photos.</p><video id="cam-v" autoplay muted playsinline data-ta="cam.preview" aria-label="Camera preview"></video><p id="cam-st" role="status" aria-live="polite"></p><p id="cam-help" class="small"></p><div class="actions"><button class="btn" type="button" data-act="cam-retry" data-t="cam.retry">Retry</button><button class="btn" type="button" data-act="cam-upload" data-t="cam.upload">Upload photos instead</button><button class="btn pri" type="button" data-act="cam-cont" data-t="cam.cont">Continue</button></div></div></dialog>
 <dialog id="modal" role="alertdialog" aria-labelledby="m-t" aria-describedby="m-b"><div class="mbox"><h2 id="m-t"></h2><p id="m-b"></p><div class="actions" id="m-a"></div></div></dialog>
 
 <script src="web-vitals.iife.js"></script>
@@ -2258,7 +2275,7 @@ function renderWelcome(){
   h+='<section class="lp-in lp-sec" aria-labelledby="lp-how-h"><h2 id="lp-how-h">'+TE("lp.how.h")+'</h2><p class="small muted">'+TE("lp.how.sub")+'</p><ol class="lp-steps">'+STAGES.map(function(sd,i){
     return '<li><span class="n" aria-hidden="true">'+(i+1)+'</span><b>'+TE(sd.nameKey)+'</b><span class="small">'+TE("lp.s."+i)+'</span></li>';}).join("")+'</ol></section>';
   h+='<div class="lp-in lp-two"><section class="box" aria-labelledby="lp-need-h"><h2 id="lp-need-h">'+TE("lp.need.h")+'</h2><p class="small">'+TE("lp.need.b",{docs:docs.join(T("ui.list_sep"))})+'</p><ul class="lp-docs">'+docs.map(function(d){return '<li>'+esc(d)+'</li>'}).join("")+'</ul><p class="small muted">'+TE("trust.1.b2")+'</p></section>'+
-    '<section class="box" aria-labelledby="lp-prot-h"><h2 id="lp-prot-h">'+TE("lp.protect.h")+'</h2><ul class="small">'+["1","2","3","4"].map(function(i){return '<li>'+TE("trust.3.b"+i)+'</li>'}).join("")+'</ul>'+
+    '<section class="box" aria-labelledby="lp-prot-h"><h2 id="lp-prot-h">'+TE("lp.protect.h")+'</h2><ul class="small">'+["1","2","3","4","6","7"].map(function(i){return '<li>'+TE("trust.3.b"+i)+'</li>'}).join("")+'</ul>'+
     '<details class="dd"><summary>'+TE("trust.2.h")+'</summary><div class="ddb"><p>'+TE("trust.2.b1")+'</p><p>'+TE("trust.2.b2")+'</p></div></details></section></div>';
   setHtml($("lp-main"),h);
 }
@@ -2317,7 +2334,7 @@ function checksMapHtml(){
 }
 function trustHtml(ids){
   var docs=DOCS.map(function(d){return T("doc."+d.k)}).join(T("ui.list_sep"));
-  var secs={"1":["trust.1.b1","trust.1.b2"],"2":["trust.2.b1","trust.2.b2","trust.2.b3"],"3":["trust.3.b1","trust.3.b2","trust.3.b3","trust.3.b4","trust.3.b5"],"4":["trust.4.b1","trust.4.b2","trust.4.b3"],"5":["trust.5.b1","trust.5.b2","trust.5.b3"]};
+  var secs={"1":["trust.1.b1","trust.1.b2"],"2":["trust.2.b1","trust.2.b2","trust.2.b3"],"3":["trust.3.b1","trust.3.b2","trust.3.b3","trust.3.b4","trust.3.b5","trust.3.b6","trust.3.b7"],"4":["trust.4.b1","trust.4.b2","trust.4.b3"],"5":["trust.5.b1","trust.5.b2","trust.5.b3"]};
   return ids.map(function(i){ return '<details class="dd"><summary>'+TE("trust."+i+".h")+'</summary><div class="ddb">'+secs[i].map(function(k){return '<p>'+TE(k,{docs:docs})+'</p>'}).join("")+'</div></details>'; }).join("");
 }
 function fullJourneyHtml(key,pm){
@@ -2604,7 +2621,7 @@ function docCard(d){
   if(ok) body+=fbHtml(S.fb[d.k]);
   if(st&&st.restored&&ok) body+='<p class="small muted">Verified in an earlier sitting. The image itself was not saved, only what was read from it.</p>';
   var nx=ok&&S.step===1?nextDocIndex():-1;
-  return '<article class="vcard k-'+d.k+(rej?" rej":"")+'">'+head+body+'<div class="vbtns">'+slotInputs(d.k,d.label,st?"Replace file":"Choose file")+(nx>=0?'<button class="btn sm pri" type="button" data-dk="'+nx+'">Next: '+DOCS[nx].label+' →</button>':'')+'</div></article>';
+  return '<article class="vcard k-'+d.k+(rej?" rej":"")+'">'+head+body+'<div class="vbtns">'+slotInputs(d.k,d.label,st?"Replace file":"Choose file")+(d.k==="SELFIE"?camLink():"")+(nx>=0?'<button class="btn sm pri" type="button" data-dk="'+nx+'">Next: '+DOCS[nx].label+' →</button>':'')+'</div></article>';
 }
 /* Instant feedback after each upload: the same rule engine runs on what has been read so far, and only the
    checks that involve this document are shown, in plain words with the exact fix. Nothing here decides. */
@@ -2667,7 +2684,7 @@ function stepDocs(){
   return '<div class="panel"><div class="ophead"><div class="head"><h1>Upload your documents</h1><p>Six items. Each file is read by OCR on your device as soon as you add it, and is accepted only if it is the right document for that slot. JPG, PNG or PDF.</p></div><div class="actions"><button class="btn" type="button" data-act="back-details">Back</button><button class="btn pri" type="button" data-act="submit"'+(allDocs()?"":" disabled")+'>Submit for verification</button></div></div>'+
   '<div class="bento"><div class="box s4" style="background:var(--sunken);box-shadow:none"><span class="small muted">Verified on your device</span><div><b class="num" style="font-size:3.2rem">'+n+'</b><span class="muted" style="font-size:1.4rem"> / 6</span></div><div class="seg6" role="progressbar" aria-label="'+TE("pb.docs")+'" aria-valuemin="0" aria-valuemax="6" aria-valuenow="'+n+'" aria-valuetext="'+esc(T("pb.docs.text",{n:n}))+'">'+DOCS.map(function(d){var st=S.docs[d.k];return '<i class="'+(docClean(d.k)?"on":st&&st.status==="ok"?"bad":st&&st.status==="rejected"?"bad":st?"run":"")+'"></i>'}).join("")+'</div></div>'+
   '<div class="box s8" style="background:var(--sunken);box-shadow:none"><div class="dtiles">'+DOCS.map(function(d,i){var st=S.docs[d.k],ok=st&&st.status==="ok",bad=st&&st.status==="rejected";return '<button type="button" data-dk="'+i+'" aria-current="'+(i===S.dk?"step":"false")+'" class="dtile c-'+d.k+(i===S.dk?" cur":"")+'"><span class="ic i-'+d.k+'">'+DSHORT[d.k][1]+'</span>'+(ok&&docClean(d.k)?'<span class="badge" aria-hidden="true" style="background:var(--ok)">✓</span>':ok||bad?'<span class="badge" aria-hidden="true" style="background:var(--bad)">!</span>':'')+'<span style="min-width:0;display:block"><b>'+DSHORT[d.k][0]+'</b><small>'+(d.k==="AADHAAR_FRONT"?"front · ":d.k==="AADHAAR_BACK"?"back · ":"")+(ok?(docClean(d.k)?"verified":docFixLabel(d.k)):bad?"not accepted":st?"reading":"to upload")+'</small></span></button>'}).join("")+'</div></div></div>'+
-  '<div class="note"><span><b>'+n+' of 6 verified.</b> Document '+(S.dk+1)+' of 6 is open below; pick any tile to switch.</span></div>'+
+  '<div class="note"><span><b>'+n+' of 6 verified.</b> Document '+(S.dk+1)+' of 6 is open below; pick any tile to switch.</span>'+camLink()+'</div>'+
   demoBox('<p class="small muted">No documents to hand? Specimens are synthetic document text built from your typed details and go through the same field reader as a real upload.</p><div class="demo-rows">'+DOCS.map(function(d){return '<div class="demo-row"><b>'+d.label+'</b>'+specCtl(d.k)+'</div>'}).join("")+'</div><button class="btn sm" type="button" data-act="spec-all">Use specimens for all</button>'+scenarioChip(true))+
   '<div class="cards">'+docCard(DOCS[S.dk]||DOCS[0])+'</div></div>';
 }
@@ -2693,7 +2710,7 @@ function ring(){
 }
 /* C6 read aloud (Web Speech API, on-device) and C7 message preview helpers. Nothing here is sent over the network. */
 var SPEECH_OK=(typeof window!=="undefined")&&("speechSynthesis" in window)&&(typeof window.SpeechSynthesisUtterance!=="undefined");
-var SPK=null,SPK_TOK=0;
+var SPK=null,SPK_TOK=0,VG=null; /* VG: the voice guide state, set up in lane VC */
 /* The visible label stays "Read aloud" (it is inside the accessible name, WCAG 2.5.3). Playing is shown by the bars and aria-pressed; clicking again stops. */
 function speakInner(on){return (on?'<span class="spk-bars" aria-hidden="true"><i></i><i></i><i></i></span>':'')+'Read aloud'}
 function speakBtn(text,lang,ctx){
@@ -2707,7 +2724,7 @@ function paintSpeak(){
     b.setAttribute("aria-pressed",on?"true":"false"); b.innerHTML=speakInner(on); }
 }
 function stopSpeech(){
-  SPK_TOK++;
+  SPK_TOK++; if(VG) VG.talking=false;
   try{ if(SPEECH_OK) window.speechSynthesis.cancel(); }catch(e){}
   SPK=null; paintSpeak();
 }
@@ -2717,18 +2734,28 @@ function toggleSpeak(text,lang){
   stopSpeech();
   if(same) return;
   try{
-    var tag=lang||"en-IN",u=new SpeechSynthesisUtterance(text),vs=window.speechSynthesis.getVoices()||[],v=null,i,my;
-    u.lang=tag;
-    for(i=0;i<vs.length;i++){ if(vs[i].lang===tag){v=vs[i];break} }
-    if(!v) for(i=0;i<vs.length;i++){ if(vs[i].lang&&vs[i].lang.slice(0,2)===tag.slice(0,2)){v=vs[i];break} }
-    if(v) u.voice=v;
-    u.rate=0.95;
-    my=++SPK_TOK;
+    var my=++SPK_TOK;
     var done=function(){ if(my===SPK_TOK){ SPK=null; paintSpeak(); } };
-    u.onend=done; u.onerror=done;
     SPK=text; paintSpeak();
-    window.speechSynthesis.speak(u);
+    speakNow(speechScrub(text),lang||"en-IN",done);
   }catch(e){ SPK=null; paintSpeak(); }
+}
+/* One utterance in the given BCP-47 tag (en-IN or hi-IN), with the closest installed voice. Shared by Read aloud and the voice guide. */
+function speakNow(text,tag,done){
+  var u=new SpeechSynthesisUtterance(text),vs=window.speechSynthesis.getVoices()||[],v=null,i;
+  u.lang=tag;
+  for(i=0;i<vs.length;i++){ if(vs[i].lang===tag){v=vs[i];break} }
+  if(!v) for(i=0;i<vs.length;i++){ if(vs[i].lang&&vs[i].lang.slice(0,2)===tag.slice(0,2)){v=vs[i];break} }
+  if(v) u.voice=v;
+  u.rate=0.95; u.onend=done; u.onerror=done;
+  window.speechSynthesis.speak(u);
+}
+/* Nothing that looks like an ID number is ever spoken: the same filters as t() (M_scrub) plus the Copilot's guard patterns
+   (PAN, a 12-digit Aadhaar with or without separators, any run of 9 or more digits even with separators). */
+function speechScrub(s){
+  s=M_scrub(String(s==null?"":s));
+  s=s.replace(/\b[A-Za-z]{5}\d{4}[A-Za-z]\b|\b\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}\b|\d(?:[\s.\-]?\d){8,}/g,"[hidden]");
+  return s.replace(/\[hidden\]/g,T("vg.hidden"));
 }
 function copyText(text,btn){
   var ok=function(good){
@@ -2948,7 +2975,7 @@ function render(){
   else if(VIEW==="help") renderHelp();
   else renderAudit();
   if(SPK!==null){ var spkLive=false; document.querySelectorAll("button.speak").forEach(function(b){ if(b.getAttribute("data-speak")===SPK) spkLive=true; }); if(!spkLive) stopSpeech(); }
-  focusUI(); persist(); stepChanged(); syncMark(); markHi();
+  focusUI(); persist(); stepChanged(); syncMark(); vgRender(); markHi();
 }
 /* Screen readers hear each application step once, and focus moves to the step heading (FR-43) */
 var LASTST=null;
@@ -3246,13 +3273,14 @@ document.addEventListener("click",function(e){
     else cheer("module done: "+MODULES[i][0]+".",hh+" of 15 hours logged.","ok");
     return render(); }
   var a=t.getAttribute("data-act"); if(!a) return;
+  if(vcClick(a)) return;
   if(p5Click(t,a)) return;
   if(a==="clear"){ S.f=Object.assign({},BLANK); S.consentAt=null; S.isSample=false; S.errs={}; render(); }
   else if(a==="sample"){ S.f=Object.assign({},SAMPLE); S.consentAt=null; S.isSample=true; /* no consent time for a tick nobody made */ S.errs={}; render(); }
   else if(a==="scn-setup"){ var scn=S.scnPick||"T1"; S.f=Object.assign({},SAMPLE); S.consentAt=null; S.isSample=true; S.errs={}; S.scenario=scn; S.scenarioApplied=false; S.specv={}; render(); }
   else if(a==="details-next"){ var all=validate(S.f),pg=DPAGES[S.dpage],lastPg=S.dpage===DPAGES.length-1; S.errs={}; Object.keys(all).forEach(function(f){ if(lastPg||pg.f.indexOf(f)>=0) S.errs[f]=all[f]; });
     if(Object.keys(S.errs).length){ if(lastPg){ var bad=-1; DPAGES.forEach(function(p,i){ if(bad<0&&p.f.some(function(f){return S.errs[f]})) bad=i; }); S.dpage=bad; }
-      render(); var b=$("det-errs")||document.querySelector(".fld.bad input,.fld.bad select"); if(b) b.focus(); cpNudge("detail-err","A field on this page needs a fix: "+Object.keys(S.errs).map(function(f){return S.errs[f]}).join(" ")); return; }
+      render(); var b=$("det-errs")||document.querySelector(".fld.bad input,.fld.bad select"); if(b) b.focus(); vgSay(T("vg.err",{n:Object.keys(S.errs).length})); cpNudge("detail-err","A field on this page needs a fix: "+Object.keys(S.errs).map(function(f){return S.errs[f]}).join(" ")); return; }
     if(!lastPg){ S.dpage++; render(); var nf=document.querySelector("#f-form input,#f-form select"); if(nf) nf.focus(); return; }
     if(!S.regLogged){ S.regLogged=true; log("REGISTRATION_STARTED","APPLICANT","Details captured · DPDP consent recorded · purpose: POSP onboarding"); cheer("your details are saved.","Next, add your six documents, one at a time.","up"); }
     S.dk=Math.max(0,nextDocIndexFrom(0)); go(1); }
@@ -3445,7 +3473,7 @@ function stepIntro(){
   '<div class="obs"><b>What is saved on this device, and for how long</b><span>Only if you tick the box below: what you type, and what is read from your documents (Aadhaar last four digits only). Never saved: document images or the full text read from them. Kept up to 30 days; 14 days once a follow-up message is open. You can delete it from the resume screen.</span></div>'+
   '<div class="fld full"><label class="consent" for="f-save"><input id="f-save" type="checkbox"'+(S.saveOK?" checked":"")+'><span>Save my progress on this device so I can resume later, as described above. I can delete it any time.</span></label></div>'+
   '<div class="obs"><b>Language</b><span>Messages to you come in English or Hindi. The screens are in English.</span></div>'+
-  '<div class="obs"><b>Shared device</b><span>On a shared phone or computer, leave saving off.</span></div>'+
+  '<div class="obs"><b>Shared device</b><span>On a shared phone or computer, leave saving off.</span></div>'+vgOffer()+
   '<div class="actions"><span class="small muted">Questions at any point? Tap <b>Ask Copilot</b>.</span><button class="btn pri" type="button" data-act="begin">'+TE("intro.start")+'</button></div></div>';
 }
 function stepResume(){
@@ -3482,8 +3510,8 @@ function tick(){
   timerDraw();
   if(!timerOn()||PICKING||s.pickAt) return;
   var left=sitLeft(s);
-  if(left<=300000&&left>0&&!s.w5){ s.w5=1; sitStore(); persist(true); announce(T("tm.5min")); }
-  if(left<=0&&!s.due&&!modalOpen()){ s.due=1; sitStore(); persist(true); log("SITTING_TIME_UP","APPLICANT","Sitting "+s.n+" · 30-minute timer reached zero · nothing reset"); showModal(T("tm.up.t"),T(keptWhere()?"tm.up.b":"tm.up.b.unsaved"),[[T("tm.more"),"m-more",1]].concat(exitChoices()),"m-more"); }
+  if(left<=300000&&left>0&&!s.w5){ s.w5=1; sitStore(); persist(true); announce(T("tm.5min")); vgSay(T("tm.5min")); }
+  if(left<=0&&!s.due&&!modalOpen()){ s.due=1; sitStore(); persist(true); log("SITTING_TIME_UP","APPLICANT","Sitting "+s.n+" · 30-minute timer reached zero · nothing reset"); vgSay(sentence(T("tm.up.t"))+" "+T(keptWhere()?"tm.up.b":"tm.up.b.unsaved")); showModal(T("tm.up.t"),T(keptWhere()?"tm.up.b":"tm.up.b.unsaved"),[[T("tm.more"),"m-more",1]].concat(exitChoices()),"m-more"); }
 }
 /* Where the progress is kept right now: "account" (account saving is on and ready), "device" (consented local save), or "" (only this tab). */
 function keptWhere(){ return S.saveOK?"device":(typeof syncOn==="function"&&syncOn())?"account":""; }
@@ -3506,7 +3534,7 @@ function saveAcctExit(){
   });
 }
 /* The file picker or camera is open: the timer waits (its time is added back when the picker closes). */
-function pickStart(){ PICKING=true; if(S.sess&&!S.sess.pickAt) S.sess.pickAt=Date.now(); }
+function pickStart(){ stopSpeech(); PICKING=true; if(S.sess&&!S.sess.pickAt) S.sess.pickAt=Date.now(); }
 function pickEnd(){ PICKING=false; if(S.sess&&S.sess.pickAt){ S.sess.paused=(S.sess.paused||0)+Math.max(0,Date.now()-S.sess.pickAt); S.sess.pickAt=0; sitStore(); } }
 document.addEventListener("click",function(e){ var i=e.target&&e.target.closest?e.target.closest('input[type="file"][data-up],label[for^="up-"]'):null; if(i) pickStart(); },true);
 document.addEventListener("cancel",function(e){ var t=e.target; if(t&&t.tagName==="INPUT"&&t.type==="file") pickEnd(); },true);
@@ -3522,6 +3550,7 @@ function beginOnboarding(){
   var c=$("f-save"); S.saveOK=!!(c&&c.checked); S.begun=true;
   log("ONBOARDING_OPENED","APPLICANT","First-visit checklist read · save on this device: "+(S.saveOK?"yes (consent)":"no"));
   startSitting(false);
+  camOpen("start");
 }
 function startSitting(resumed){
   /* A sitting that still has time left (same tab, a reload, or a return from another view) carries on with the same timer. */
@@ -3588,7 +3617,8 @@ function watching(){return S.focus&&S.sess&&S.step<2&&VIEW==="apply"}
 var SAVEKEY="pn-onboarding-v1",lastSave=0;
 function persist(force){
   if(!S.saveOK||S.status==="IN_REVIEW"||S.rechecking) return;
-  var now=Date.now(); if(!force&&now-lastSave<400) return; lastSave=now;
+  /* Saves at most every 400 ms; a skipped save is made when that gap ends, so the last change before a quick reload is kept. */
+  var now=Date.now(); clearTimeout(persist.trail); if(!force&&now-lastSave<400){ var sk=SAVEKEY; persist.trail=setTimeout(function(){ persist.trail=0; if(sk===SAVEKEY) persist(true); },400-(now-lastSave)); return; } lastSave=now;
   /* Internal events (fraud desk, reviewer notes) are never saved; the in-memory copy keeps them for the Audit view. */
   try{ LOCALSAVE=now; localStorage.setItem(SAVEKEY,JSON.stringify({v:1,savedAt:now,S:savedCopy()},function(k,v){ if(k==="url"||k==="thumb"||k==="text"||k==="rnote") return undefined; if((k==="note"||k==="rec")&&this&&"ask" in this&&"opened" in this) return undefined; if(k==="events"&&Array.isArray(v)) return v.filter(function(e){return e.audience!=="internal"}); return v })) }catch(e){}
 }
@@ -3627,9 +3657,11 @@ function restore(){
     return true; }catch(e){ return false; }
 }
 var DROPPED=false;
+/* A save still waiting for its 400 ms gap is made now when the page is closed or reloaded. */
+window.addEventListener("pagehide",function(){ if(persist.trail){ clearTimeout(persist.trail); persist.trail=0; persist(true); } });
 /* Removes every PolicyNest key except the theme choice (pn-theme). */
 function wipeSaved(){
-  var ks=[]; try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf("pn-")===0&&k!=="pn-theme") ks.push(k) } }catch(e){}
+  clearTimeout(persist.trail); persist.trail=0; var ks=[]; try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf("pn-")===0&&k!=="pn-theme") ks.push(k) } }catch(e){}
   ks.forEach(function(k){ try{ localStorage.removeItem(k) }catch(e){} });
 }
 function askNewApp(){ showModal("Start a new application?","This clears the form and documents on this screen and starts an empty application. Anything saved on this device is deleted. This cannot be undone.",[["Start a new application","m-newapp",1],["Keep this one","m-close"]]); }
@@ -3647,6 +3679,7 @@ function afterDoc(k){
     DOCS.forEach(function(o){ if(o.k!==k&&S.docs[o.k]&&S.docs[o.k].status==="ok") S.fb[o.k]=feedbackFor(o.k); }); /* a new PAN can settle other documents' checks */
     if(fb.stop.length||fb.fix.length) cpNudge("fb-"+k+"-"+S.events.length,DOC_LABEL[k][0].charAt(0).toUpperCase()+DOC_LABEL[k][0].slice(1)+": "+(fb.stop[0]||fb.fix[0]).what+" Ask me if you are not sure what to do.");
   } else if(d.status==="rejected"){ delete S.fb[k]; cpNudge("rej-"+k+"-"+S.events.length,"Your "+DOC_LABEL[k][0]+" was not accepted. "+d.reason); }
+  vgUpload(k);
 }
 function nextDocIndexFrom(i){ for(var j=0;j<DOCS.length;j++){ var x=(i+j)%DOCS.length,st=S.docs[DOCS[x].k]; if(!st||st.status!=="ok") return x; } return -1; }
 function nextStepText(){
@@ -3663,7 +3696,8 @@ function nextStepText(){
 var COPILOT_URL=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'http://localhost:8787':"https://policynest-copilot.embarko.app";
 var CP={log:[],kb:null,idf:null,llm:null,busy:false,seen:{},idleT:null};
 function cpOpen(on,focusQuestion){ var p=$("cp"),f=$("cp-fab");clearTimeout(CP.focusT);p.hidden=!on; f.setAttribute("aria-expanded",String(on)); f.hidden=on; if(on){ $("cp-badge").hidden=true; if(!CP.log.length) cpPush("a",T("cp.hello",{n:fname()})+" "+nextStepText()); cpQuick(); cpDraw(); if(focusQuestion!==false)CP.focusT=setTimeout(function(){var q=$("cp-q"); if(q) q.focus()},30); } else { document.body.classList.remove("typing"); f.focus(); } }
-function cpPush(who,text,meta,extra){ var m={who:who,text:text,meta:meta||""}; if(extra) Object.keys(extra).forEach(function(k){m[k]=extra[k]}); CP.log.push(m); if(CP.log.length>40) CP.log.shift(); cpDraw(); }
+function cpPush(who,text,meta,extra){ var m={who:who,text:text,meta:meta||""}; if(extra) Object.keys(extra).forEach(function(k){m[k]=extra[k]}); CP.log.push(m); if(CP.log.length>40) CP.log.shift(); cpDraw();
+  if(VG&&VG.await&&who==="a"&&text&&!m.typing){ VG.await=false; vgSay(text); } }
 function cpShort(s){ s=String(s); return s.length>52?s.slice(0,51)+"…":s; }
 function cpDraw(){ var l=$("cp-log"); if(!l) return; l.setAttribute("aria-busy",CP.busy?"true":"false");
   l.innerHTML=CP.log.map(function(m,i){
@@ -4625,19 +4659,28 @@ $('guide-read').hidden=!SPEECH_OK;
 $('guide-read').addEventListener('click',function(){
   var last=CP.log.slice().reverse().find(function(m){return m.who==='a'&&m.text!=='Thinking…'});
   var text=last?last.text:guidanceText();
-  text=text.replace(/\b[A-Z]{5}\d{4}[A-Z]\b|\b\d{4}[\s.\-]?\d{4}[\s.\-]?\d{4}\b|\b\d(?:[\s.\-]?\d){8,}\b/g,'number hidden');
   toggleSpeak(text,$('guide-lang').value);
 });
 var recognition=null,Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+/* Push to talk: one utterance per press, never continuous. Pressing again while listening stops it. Shared by the Copilot's
+   "Ask by voice" (fills the question box) and the voice guide's mic (asks the Copilot and speaks the answer). Returns false when it
+   did not start. The audio is handled by the browser's own recogniser; PolicyNest never receives or keeps it. */
+function voiceListen(lang,btn,onText,onFail){
+  if(!Recognition) return false;
+  if(recognition){ recognition.stop(); return false; }
+  stopSpeech();
+  recognition=new Recognition(); recognition.lang=lang; recognition.continuous=false; recognition.interimResults=false;
+  if(btn) btn.setAttribute('aria-pressed','true');
+  recognition.onresult=function(e){ var tx=e.results&&e.results[0]&&e.results[0][0]?String(e.results[0][0].transcript||''):''; if(tx) onText(tx); };
+  recognition.onerror=function(){ if(onFail) onFail(); };
+  recognition.onend=function(){ recognition=null; if(btn) btn.setAttribute('aria-pressed','false'); };
+  try{ recognition.start(); }catch(e){ recognition=null; if(btn) btn.setAttribute('aria-pressed','false'); if(onFail) onFail(); return false; }
+  return true;
+}
 $('guide-mic').hidden=!Recognition;
 $('guide-mic').addEventListener('click',function(){
-  if(recognition){recognition.stop();return}
-  recognition=new Recognition();recognition.lang=$('guide-lang').value;recognition.continuous=false;recognition.interimResults=false;
-  $('guide-status').textContent='Listening. Press Stop voice to cancel.';$('guide-mic').setAttribute('aria-pressed','true');
-  recognition.onresult=function(e){$('cp-q').value=e.results[0][0].transcript;$('guide-status').textContent='Review the recognised question, then press Send.'};
-  recognition.onerror=function(){$('guide-status').textContent='Voice input is unavailable or permission was declined. Please type your question.'};
-  recognition.onend=function(){recognition=null;$('guide-mic').setAttribute('aria-pressed','false')};
-  try{recognition.start()}catch(e){recognition=null;$('guide-status').textContent='Please type your question.'}
+  var on=voiceListen($('guide-lang').value,$('guide-mic'),function(tx){$('cp-q').value=tx;$('guide-status').textContent='Review the recognised question, then press Send.'},function(){$('guide-status').textContent='Voice input is unavailable or permission was declined. Please type your question.'});
+  if(on) $('guide-status').textContent='Listening. Press Stop voice to cancel.';
 });
 $('guide-stop').addEventListener('click',function(){stopSpeech();if(recognition)recognition.abort();$('guide-status').textContent='Voice stopped.'});
 $('guide-lang').addEventListener('change',function(){stopSpeech();if(recognition)recognition.abort()});
@@ -5003,6 +5046,299 @@ function rvNotifHook(items){
   var mx=0; (items||[]).forEach(function(n){ if(/^(review|appeal)\./.test(String(n.key||""))&&n.id>mx) mx=n.id; });
   if(RVN===null){ RVN=mx; return; }
   if(mx>RVN){ RVN=mx; rvRefresh(); }
+}
+/* ===== Lane VC: the voice guide and the camera check (planning/VOICE_AND_CAMERA_PLAN.md).
+   Speech uses the browser's own speechSynthesis and SpeechRecognition, through the same helpers as Read aloud (speakNow, stopSpeech)
+   and the Copilot mic (voiceListen). Every spoken line comes from these i18n tables and passes speechScrub, so no ID number is spoken.
+   The camera check shows a live preview inside its dialog only: nothing from the camera is recorded, saved or sent, and every track is
+   stopped when the dialog closes. Hindi strings were written by Claude, not a native speaker: a native Hindi speaker should review them. ===== */
+var I18N_VC={en:{
+ "vg.btn":"Voice guide","vg.cap.pre":"Guide:","vg.stop":"Stop","vg.mic":"Ask by voice",
+ "vg.mic.listen":"Listening. Ask your question, then wait a moment.","vg.mic.err":"Voice input is not available here. Please type your question in the Copilot.",
+ "vg.on.sr":"Voice guide on","vg.off.sr":"Voice guide off","vg.stopped":"Voice stopped.",
+ "vg.hello":"Voice guide is on. Each step is read aloud. Press Stop or Escape to stop the voice.",
+ "vg.offer.h":"Turn on the voice guide?",
+ "vg.offer.b":"It reads each step and each document result aloud, in English or Hindi, and you can ask questions by voice. Nothing is recorded. You can turn it off at any time.",
+ "vg.offer.btn":"Use the voice guide","vg.hidden":"number hidden",
+ "vg.d.0":"Page 1 of 4: who you are. Type your name and date of birth exactly as on your PAN card, and choose your highest education.",
+ "vg.d.1":"Page 2 of 4: your ID numbers. Type your PAN, and only the last four digits of your Aadhaar.",
+ "vg.d.2":"Page 3 of 4: how we reach you. Type your mobile number and email, then choose your state and city.",
+ "vg.d.3":"Page 4 of 4: bank account and consent. Type your account number and IFSC, then tick the consent box.",
+ "vg.err":"Fields to fix on this page: {n}. They are listed at the top of the form.",
+ "vg.doc.PAN":"Document {n} of 6: your PAN card. Place it flat in daylight with all four corners visible.",
+ "vg.doc.AADHAAR_FRONT":"Document {n} of 6: the front of your Aadhaar card, the side with your photo. Place it flat in daylight with all four corners visible.",
+ "vg.doc.AADHAAR_BACK":"Document {n} of 6: the back of your Aadhaar card, the side with your address.",
+ "vg.doc.CLASS10":"Document {n} of 6: your Class 10 marksheet or pass certificate. Keep the whole page in the photo.",
+ "vg.doc.BANK":"Document {n} of 6: a cancelled cheque or the first page of a bank statement, for an account in your own name.",
+ "vg.doc.SELFIE":"Document {n} of 6: your selfie. Face the camera in daylight, with nothing covering your face.",
+ "vg.up.ok":"{doc} is verified.","vg.up.fix":"{doc} needs a fix.","vg.up.stop":"{doc} does not meet a rule.",
+ "vg.up.human":"{doc} is read. A person on our team checks one detail after you submit.","vg.up.rej":"{doc} was not accepted.",
+ "vg.up.see":"The steps to fix it are on the screen.","vg.alldocs":"All six documents are verified. Press Submit for verification.",
+ "vg.v.run":"We are checking your documents against the rulebook. This takes a few seconds.","vg.v.recheck":"We are re-checking the documents you replaced.",
+ "vg.v.ok":"Good news, {name}: you are verified. Press Start training.",
+ "vg.v.fu":"Things to fix: {n}. {list}. Fix them together, then send them for a re-check.",
+ "vg.v.no":"Your application was not accepted. The reasons are on this page in plain words. If you think it is wrong, you can ask a person to look again.",
+ "vg.v.human":"A person on our team is checking a few details. Nothing is needed from you now.",
+ "vg.rv.ok":"A reviewer approved your application. Your training is unlocked.",
+ "vg.rv.more":"A reviewer needs a few things from you: {list}. Fix them, then send them for a re-check.",
+ "vg.rv.no":"A reviewer has made a decision. The reason is on this page. If you disagree, you can appeal.",
+ "vg.item":"{doc}, {issue}",
+ "vg.tr.0":"Training: complete the five modules, 15 hours in all, to unlock the exam.","vg.tr.n":"Modules done: {n} of {total}.","vg.tr.done":"Training complete. Press Take the exam.",
+ "vg.ex":"Exam: five questions. The pass mark is 50 percent.","vg.ex.fail":"Not passed this time. You can try again.",
+ "vg.cert":"Congratulations, {name}. You are a certified POSP. Your certificate is on this page.",
+ "cam.h":"Check your camera","cam.lead":"See that your camera works before you take photos. The picture stays on this screen: nothing is recorded, saved or sent.",
+ "cam.link":"Check camera","cam.preview":"Camera preview","cam.wait":"Asking for the camera…",
+ "cam.ok":"Camera works.","cam.ok.b":"You can take photos of your documents and your selfie.",
+ "cam.blocked":"Camera blocked.","cam.blocked.b":"Allow the camera for this site, then press Retry. On a computer: click the lock icon next to the web address and set Camera to Allow. On Android Chrome: tap the lock icon, then Permissions, then Camera. On iPhone: Settings, then Safari, then Camera.",
+ "cam.none":"No camera found.","cam.none.b":"This device has no camera we can use. You can upload photos from your gallery or files instead.",
+ "cam.busy":"Camera in use by another app.","cam.busy.b":"Close the other app or tab that uses the camera, then press Retry.",
+ "cam.unsupported":"Camera check not available.","cam.unsupported.b":"This browser cannot open the camera here. You can upload photos instead.",
+ "cam.insecure":"Camera check not available.","cam.insecure.b":"The camera works only on a secure (https) page. You can upload photos instead.",
+ "cam.dark":"The picture is black.","cam.dark.b":"The camera may be covered or switched off. Uncover it and press Retry, or upload photos instead.",
+ "cam.retry":"Retry","cam.cont":"Continue","cam.upload":"Upload photos instead",
+ "cam.upload.note":"You can add each document from your gallery or files with Choose file on its card.",
+ "trust.3.b6":"The camera check shows a live preview on this device only. Nothing from the camera is recorded, saved or sent.",
+ "trust.3.b7":"The voice guide uses your browser's own voice. If you ask a question by voice, your browser's maker may process the audio (Chrome sends it to Google). PolicyNest records nothing."
+},hi:{
+ "vg.btn":"वॉइस गाइड","vg.cap.pre":"गाइड:","vg.stop":"रोकें","vg.mic":"बोलकर पूछें",
+ "vg.mic.listen":"सुन रहे हैं। अपना सवाल बोलें, फिर थोड़ा रुकें।","vg.mic.err":"यहाँ बोलकर पूछना उपलब्ध नहीं है। कृपया Copilot में अपना सवाल लिखें।",
+ "vg.on.sr":"वॉइस गाइड चालू","vg.off.sr":"वॉइस गाइड बंद","vg.stopped":"आवाज़ रोक दी गई।",
+ "vg.hello":"वॉइस गाइड चालू है। हर चरण पढ़कर सुनाया जाएगा। आवाज़ रोकने के लिए रोकें बटन या Escape दबाएँ।",
+ "vg.offer.h":"वॉइस गाइड चालू करें?",
+ "vg.offer.b":"यह हर चरण और हर दस्तावेज़ का नतीजा अंग्रेज़ी या हिंदी में पढ़कर सुनाता है, और आप बोलकर सवाल पूछ सकते हैं। कुछ भी रिकॉर्ड नहीं होता। आप इसे कभी भी बंद कर सकते हैं।",
+ "vg.offer.btn":"वॉइस गाइड इस्तेमाल करें","vg.hidden":"नंबर छिपाया गया",
+ "vg.d.0":"पेज 1, कुल 4: आप कौन हैं। अपना नाम और जन्म तिथि ठीक वैसे लिखें जैसे आपके PAN कार्ड पर है, और अपनी सबसे ऊँची पढ़ाई चुनें।",
+ "vg.d.1":"पेज 2, कुल 4: आपके पहचान नंबर। अपना PAN लिखें, और Aadhaar के सिर्फ़ आख़िरी चार अंक।",
+ "vg.d.2":"पेज 3, कुल 4: हम आपसे कैसे संपर्क करें। अपना मोबाइल नंबर और ईमेल लिखें, फिर अपना राज्य और शहर चुनें।",
+ "vg.d.3":"पेज 4, कुल 4: बैंक खाता और सहमति। अपना खाता नंबर और IFSC लिखें, फिर सहमति वाले बॉक्स पर निशान लगाएँ।",
+ "vg.err":"इस पेज पर ठीक करने वाले खाने: {n}। उनकी सूची फ़ॉर्म के ऊपर है।",
+ "vg.doc.PAN":"दस्तावेज़ {n}, कुल 6: आपका PAN कार्ड। इसे दिन की रोशनी में समतल रखें, चारों कोने दिखें।",
+ "vg.doc.AADHAAR_FRONT":"दस्तावेज़ {n}, कुल 6: आपके Aadhaar कार्ड का आगे का हिस्सा, जिस पर आपकी फ़ोटो है। इसे दिन की रोशनी में समतल रखें, चारों कोने दिखें।",
+ "vg.doc.AADHAAR_BACK":"दस्तावेज़ {n}, कुल 6: आपके Aadhaar कार्ड का पीछे का हिस्सा, जिस पर आपका पता है।",
+ "vg.doc.CLASS10":"दस्तावेज़ {n}, कुल 6: आपकी 10वीं की मार्कशीट या पास प्रमाणपत्र। पूरा पेज फ़ोटो में आए।",
+ "vg.doc.BANK":"दस्तावेज़ {n}, कुल 6: रद्द किया हुआ चेक या बैंक स्टेटमेंट का पहला पेज, आपके अपने नाम के खाते का।",
+ "vg.doc.SELFIE":"दस्तावेज़ {n}, कुल 6: आपकी सेल्फ़ी। दिन की रोशनी में कैमरे की ओर देखें, चेहरा ढका न हो।",
+ "vg.up.ok":"{doc} सत्यापित हो गया।","vg.up.fix":"{doc} में सुधार चाहिए।","vg.up.stop":"{doc} एक नियम पूरा नहीं करता।",
+ "vg.up.human":"{doc} पढ़ लिया गया। जमा करने के बाद हमारी टीम का एक व्यक्ति एक बात जाँचेगा।","vg.up.rej":"{doc} स्वीकार नहीं हुआ।",
+ "vg.up.see":"सुधार के चरण स्क्रीन पर लिखे हैं।","vg.alldocs":"सभी छह दस्तावेज़ सत्यापित हो गए। अब सत्यापन के लिए जमा करें दबाएँ।",
+ "vg.v.run":"हम आपके दस्तावेज़ों को नियमों से जाँच रहे हैं। इसमें कुछ सेकंड लगते हैं।","vg.v.recheck":"आपके बदले हुए दस्तावेज़ों की दोबारा जाँच हो रही है।",
+ "vg.v.ok":"अच्छी ख़बर, {name}: आप सत्यापित हो गए। अब प्रशिक्षण शुरू करें दबाएँ।",
+ "vg.v.fu":"ठीक करने वाली चीज़ें: {n}। {list}। इन्हें एक साथ ठीक करें, फिर दोबारा जाँच के लिए भेजें।",
+ "vg.v.no":"आपका आवेदन स्वीकार नहीं हुआ। कारण इस पेज पर आसान शब्दों में लिखे हैं। अगर आपको लगता है कि यह गलत है, तो आप किसी व्यक्ति से दोबारा देखने को कह सकते हैं।",
+ "vg.v.human":"हमारी टीम का एक व्यक्ति कुछ बातें जाँच रहा है। अभी आपको कुछ नहीं करना है।",
+ "vg.rv.ok":"एक समीक्षक ने आपका आवेदन मंज़ूर कर दिया है। आपका प्रशिक्षण खुल गया है।",
+ "vg.rv.more":"एक समीक्षक को आपसे कुछ चीज़ें चाहिए: {list}। इन्हें ठीक करें, फिर दोबारा जाँच के लिए भेजें।",
+ "vg.rv.no":"एक समीक्षक ने फ़ैसला ले लिया है। कारण इस पेज पर है। अगर आप सहमत नहीं हैं, तो अपील कर सकते हैं।",
+ "vg.item":"{doc}, {issue}",
+ "vg.tr.0":"प्रशिक्षण: परीक्षा खोलने के लिए पाँचों मॉड्यूल पूरे करें, कुल 15 घंटे।","vg.tr.n":"पूरे हुए मॉड्यूल: {n}, कुल {total}।","vg.tr.done":"प्रशिक्षण पूरा हुआ। अब परीक्षा दें दबाएँ।",
+ "vg.ex":"परीक्षा: पाँच सवाल। पास होने के लिए 50 प्रतिशत चाहिए।","vg.ex.fail":"इस बार पास नहीं हुए। आप फिर से कोशिश कर सकते हैं।",
+ "vg.cert":"बधाई हो, {name}। आप प्रमाणित POSP हैं। आपका प्रमाणपत्र इस पेज पर है।",
+ "cam.h":"अपना कैमरा जाँचें","cam.lead":"फ़ोटो लेने से पहले देख लें कि आपका कैमरा काम करता है। तस्वीर सिर्फ़ इसी स्क्रीन पर रहती है: कुछ भी रिकॉर्ड, सेव या भेजा नहीं जाता।",
+ "cam.link":"कैमरा जाँचें","cam.preview":"कैमरे की लाइव तस्वीर","cam.wait":"कैमरे की अनुमति माँगी जा रही है…",
+ "cam.ok":"कैमरा काम कर रहा है।","cam.ok.b":"आप अपने दस्तावेज़ों और सेल्फ़ी की फ़ोटो ले सकते हैं।",
+ "cam.blocked":"कैमरा ब्लॉक है।","cam.blocked.b":"इस साइट के लिए कैमरे की अनुमति दें, फिर फिर से कोशिश करें दबाएँ। कंप्यूटर पर: वेब पते के पास ताले के निशान पर क्लिक करें और Camera को Allow करें। Android Chrome पर: ताले के निशान पर टैप करें, फिर Permissions, फिर Camera। iPhone पर: Settings, फिर Safari, फिर Camera।",
+ "cam.none":"कोई कैमरा नहीं मिला।","cam.none.b":"इस डिवाइस पर इस्तेमाल लायक कैमरा नहीं है। आप गैलरी या फ़ाइलों से फ़ोटो अपलोड कर सकते हैं।",
+ "cam.busy":"कैमरा किसी दूसरे ऐप में चल रहा है।","cam.busy.b":"कैमरा इस्तेमाल कर रहे दूसरे ऐप या टैब को बंद करें, फिर फिर से कोशिश करें दबाएँ।",
+ "cam.unsupported":"कैमरा जाँच उपलब्ध नहीं है।","cam.unsupported.b":"यह ब्राउज़र यहाँ कैमरा नहीं खोल सकता। आप फ़ोटो अपलोड कर सकते हैं।",
+ "cam.insecure":"कैमरा जाँच उपलब्ध नहीं है।","cam.insecure.b":"कैमरा सिर्फ़ सुरक्षित (https) पेज पर काम करता है। आप फ़ोटो अपलोड कर सकते हैं।",
+ "cam.dark":"तस्वीर काली है।","cam.dark.b":"शायद कैमरा ढका है या बंद है। उसे खोलें और फिर से कोशिश करें दबाएँ, या फ़ोटो अपलोड करें।",
+ "cam.retry":"फिर से कोशिश करें","cam.cont":"आगे बढ़ें","cam.upload":"इसके बजाय फ़ोटो अपलोड करें",
+ "cam.upload.note":"हर दस्तावेज़ उसके कार्ड पर फ़ाइल चुनने वाले बटन से गैलरी या फ़ाइलों से जोड़ा जा सकता है।",
+ "trust.3.b6":"कैमरा जाँच सिर्फ़ इसी डिवाइस पर लाइव तस्वीर दिखाती है। कैमरे से कुछ भी रिकॉर्ड, सेव या भेजा नहीं जाता।",
+ "trust.3.b7":"वॉइस गाइड आपके ब्राउज़र की अपनी आवाज़ इस्तेमाल करता है। अगर आप बोलकर सवाल पूछते हैं, तो आपके ब्राउज़र की कंपनी उस आवाज़ को प्रोसेस कर सकती है (Chrome इसे Google को भेजता है)। PolicyNest कुछ भी रिकॉर्ड नहीं करता।"
+}};
+Object.keys(I18N_VC.en).forEach(function(k){I18N.en[k]=I18N_VC.en[k]});
+Object.keys(I18N_VC.hi).forEach(function(k){I18N.hi[k]=I18N_VC.hi[k]});
+
+/* ---- Voice guide. Off by default; the choice is remembered per device (pn-voice-guide). It never speaks before the visitor has
+   pressed or tapped something on the page, because browsers block that and it would surprise people. ---- */
+var VG_KEY="pn-voice-guide";
+VG={on:false,key:"",gest:false,await:false,talking:false,upQ:[],upT:null,sayT:null};
+try{ VG.on=SPEECH_OK&&localStorage.getItem(VG_KEY)==="1"; }catch(e){ VG.on=false; }
+["pointerdown","keydown","touchstart"].forEach(function(ev){ document.addEventListener(ev,function(e){ if(e.isTrusted!==false) VG.gest=true; },true); });
+function vgGest(){ try{ if(navigator.userActivation&&navigator.userActivation.hasBeenActive) return true; }catch(e){} return VG.gest; }
+function vgTag(){ return LANG==="hi"?"hi-IN":"en-IN"; }
+function vgCap(text){ var el=$("vg-txt"); if(el&&el.textContent!==text) el.textContent=text; }
+/* Speak one line (and show it in the caption). The previous line is stopped first. */
+function vgSay(text){
+  if(!VG||!VG.on||!SPEECH_OK) return;
+  text=speechScrub(text).replace(/\s+/g," ").trim(); if(!text) return;
+  vgCap(text); markHi();
+  if(!vgGest()) return;
+  stopSpeech(); var my=SPK_TOK; VG.talking=true; clearTimeout(VG.sayT);
+  /* A short gap after cancel(): some Chrome builds drop an utterance queued in the same task as cancel(). */
+  VG.sayT=setTimeout(function(){ if(my!==SPK_TOK||!VG.on) return;
+    try{ speakNow(text,vgTag(),function(){ if(my===SPK_TOK) VG.talking=false; }); }catch(e){ VG.talking=false; } },60);
+}
+function vgStop(quiet){ clearTimeout(VG.sayT); stopSpeech(); if(recognition) try{ recognition.abort(); }catch(e){} VG.await=false; if(!quiet) announce(T("vg.stopped")); }
+function vgSet(on){
+  if(!SPEECH_OK) return;
+  VG.on=!!on; try{ localStorage.setItem(VG_KEY,VG.on?"1":"0"); }catch(e){}
+  if(!VG.on){ var fo=document.activeElement&&document.activeElement.id; vgStop(true); VG.key=""; vgCap(""); vgBar(); announce(T("vg.off.sr"));
+    if(VIEW==="apply"){ render(); var fx=fo&&$(fo); if(fx&&!fx.hidden&&fx.offsetParent&&fx!==document.activeElement) try{ fx.focus(); }catch(e){} else if(fo==="vg-off"){ var f2=$("fb-vg"); if(f2&&!f2.hidden&&f2.offsetParent) f2.focus(); } } return; }
+  var L=vgLine(),fid=document.activeElement&&document.activeElement.id; VG.key=L?L.key:"";
+  if(VIEW==="apply"){ render(); var fe=fid&&$(fid); if(fe&&fe!==document.activeElement) try{ fe.focus(); }catch(e){} } else vgBar();
+  announce(T("vg.on.sr"));
+  vgSay(T("vg.hello")+(L&&L.text?" "+L.text:""));
+}
+function vgBar(){
+  var on=!!(VG&&VG.on),show=on&&VIEW==="apply"&&S&&S.begun&&canSee("apply");
+  var bar=$("vgbar"); if(bar) bar.hidden=!show;
+  var fb=$("fb-vg"); if(fb){ fb.hidden=!SPEECH_OK; fb.setAttribute("aria-pressed",on?"true":"false"); }
+  var mic=$("vg-mic"); if(mic) mic.hidden=!Recognition;
+}
+function vgOffer(){
+  if(!SPEECH_OK) return "";
+  var on=!!(VG&&VG.on);
+  return '<div class="obs"><b>'+TE("vg.offer.h")+'</b><span>'+TE("vg.offer.b")+'</span><span><button class="btn sm" type="button" id="vg-offer" data-act="vg-toggle" aria-pressed="'+(on?"true":"false")+'">'+TE("vg.offer.btn")+'</button></span></div>';
+}
+function vgByReviewer(){
+  if(S.rej&&S.rej.some(function(r){return r.code==="REVIEWER"})) return true;
+  if(S.fu&&S.fu.rv) return true;
+  var last=S.rounds&&S.rounds[S.rounds.length-1]; return !!(last&&last.by==="reviewer");
+}
+function vgItems(items){
+  return (items||[]).map(function(i){ return T("vg.item",{docKey:"doc."+i.key,issue:issLabel(i.code,LANG)}); }).join(T("ui.list_sep"));
+}
+function vgDecision(D){
+  var rv=vgByReviewer();
+  if(D==="APPROVE") return rv?T("vg.rv.ok"):T("vg.v.ok",{name:fname()});
+  if(D==="NEEDS_MORE_INFO"){ var it=(S.fu&&S.fu.items)||[]; return T(rv?"vg.rv.more":"vg.v.fu",{n:it.length,list:vgItems(it)}); }
+  if(D==="REJECT") return T(rv?"vg.rv.no":"vg.v.no");
+  return T("vg.v.human");
+}
+/* What the guide says for the screen that is showing, and a key that changes only when that screen changes. */
+function vgLine(){
+  if(VIEW!=="apply"||!S||!S.begun||!canSee("apply")) return null;
+  var L=LANG+"|";
+  if(S.step<2&&!S.focus) return {key:L+"resume",text:""};
+  if(S.step===0) return {key:L+"d"+S.dpage,text:T("vg.d."+S.dpage)};
+  if(S.step===1){ var d=DOCS[S.dk]||DOCS[0]; return {key:L+"doc"+S.dk,text:T("vg.doc."+d.k,{n:(S.dk|0)+1})}; }
+  if(S.step===2){ var total=(S.checks||[]).length,done=!S.rechecking&&S.shown>=total;
+    if(!done) return {key:L+"v-run-"+S.round,text:T(S.rechecking?"vg.v.recheck":"vg.v.run")};
+    return {key:L+"v-"+S.decision+"-"+S.round+"-"+(S.rvSig||"")+(S.disputed?"-d":""),text:vgDecision(S.decision)}; }
+  if(S.step===3){ var n=(S.mods||[]).filter(Boolean).length,m=MODULES.length; return {key:L+"tr"+n,text:n===0?T("vg.tr.0"):n<m?T("vg.tr.n",{n:n,total:m}):T("vg.tr.done")}; }
+  if(S.step===4){ var sc=S.exam&&S.exam.score; var fail=sc!==null&&sc!==undefined&&sc<50; return {key:L+"ex"+(fail?"f":"q"),text:T(fail?"vg.ex.fail":"vg.ex")}; }
+  return {key:L+"cert",text:T("vg.cert",{name:fname()})};
+}
+/* Called at the end of every render(): speaks only when the step, page, document slot or decision changed. */
+function vgRender(){
+  if(!VG) return; vgBar();
+  if(!VG.on){ VG.key=""; return; }
+  var L=vgLine(); if(!L){ VG.key=""; return; }
+  if(L.key===VG.key) return;
+  VG.key=L.key; if(L.text) vgSay(L.text);
+}
+/* Upload results: the same content as the instant feedback card (English) or its issue labels (Hindi). Several results that arrive
+   together (for example all six at once) are read as one line. */
+function vgUploadText(k){
+  var d=S.docs[k]; if(!d) return "";
+  var name=T("doc."+k),en=LANG!=="hi";
+  function iss(list){ var seen=[]; list.forEach(function(i){ var l=issLabel(i.code||"OTHER",LANG); if(seen.indexOf(l)<0) seen.push(l); }); return seen.length?sentence(seen.join(T("ui.list_sep")))+" "+T("vg.up.see"):T("vg.up.see"); }
+  if(d.status==="rejected") return T("vg.up.rej",{doc:name})+" "+(en?fbSpeechText(rejectFeedback(d.reason||"")):T("vg.up.see"));
+  if(d.status!=="ok") return "";
+  var fb=S.fb[k]; if(!fb) return T("vg.up.ok",{doc:name});
+  if(fb.stop.length) return T("vg.up.stop",{doc:name})+" "+(en?fbSpeechText({stop:fb.stop,fix:[],human:[],good:[],later:[]}):iss(fb.stop));
+  if(fb.fix.length) return T("vg.up.fix",{doc:name})+" "+(en?fbSpeechText({stop:[],fix:fb.fix,human:[],good:[],later:[]}):iss(fb.fix));
+  if(fb.human.length) return T("vg.up.human",{doc:name});
+  return T("vg.up.ok",{doc:name});
+}
+function vgUpload(k){
+  if(!VG||!VG.on) return;
+  if(VG.upQ.indexOf(k)<0) VG.upQ.push(k);
+  clearTimeout(VG.upT);
+  VG.upT=setTimeout(function(){ var ks=VG.upQ.splice(0); if(VIEW!=="apply"||S.step!==1) return;
+    var txt=ks.map(vgUploadText).filter(Boolean).join(" "); if(allDocs()) txt+=" "+T("vg.alldocs"); vgSay(txt); },350);
+}
+function vgMic(){
+  var b=$("vg-mic");
+  var on=voiceListen(vgTag(),b,function(tx){ VG.await=true; cpAsk(tx); },function(){ VG.await=false; vgCap(T("vg.mic.err")); announce(T("vg.mic.err")); });
+  if(on) vgCap(T("vg.mic.listen"));
+}
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&VG&&(VG.talking||SPK!==null||recognition)) vgStop(); });
+
+/* ---- Camera check: a native <dialog>. It never blocks onboarding (file uploads always work) and records nothing. ---- */
+var CAM={stream:null,tok:0,state:"",src:"",prev:null,quiet:false};
+function camLink(){ return '<button class="btn sm" type="button" data-act="cam-check">'+TE("cam.link")+'</button>'; }
+function camOpen(src){
+  var d=$("camdlg"); if(!d||d.open) return;
+  stopSpeech(); CAM.src=src||"link"; CAM.prev=document.activeElement; staticI18n();
+  try{ if(typeof d.showModal==="function") d.showModal(); else d.setAttribute("open",""); }catch(e){ return; }
+  camRun();
+  var c=d.querySelector('[data-act="cam-cont"]'); if(c) try{ c.focus(); }catch(e){}
+  markHi();
+}
+function camStop(){
+  CAM.tok++; var s=CAM.stream; CAM.stream=null;
+  if(s) try{ s.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+  var v=$("cam-v"); if(v){ try{ v.pause(); }catch(e){} v.srcObject=null; }
+}
+function camSet(st){
+  CAM.state=st; var d=$("camdlg"); if(!d) return;
+  d.setAttribute("data-state",st);
+  $("cam-st").textContent=T("cam."+st); $("cam-help").textContent=st==="wait"?"":T("cam."+st+".b");
+  $("cam-v").hidden=!(st==="ok"||st==="wait"||st==="dark");
+  if(st!=="wait"){
+    log("CAMERA_CHECK","APPLICANT","Result: "+st+" · opened from "+(CAM.src==="start"?"the start of onboarding":"the Check camera link")+" · nothing recorded, saved or sent");
+    vgSay(T("cam."+st)+" "+T("cam."+st+".b"));
+  }
+  markHi();
+}
+function camRun(){
+  camStop(); var my=CAM.tok; camSet("wait");
+  if(typeof window.isSecureContext==="boolean"&&!window.isSecureContext) return camSet("insecure");
+  if(!navigator.mediaDevices||typeof navigator.mediaDevices.getUserMedia!=="function") return camSet("unsupported");
+  var p; try{ p=navigator.mediaDevices.getUserMedia({video:true}); }catch(e){ return camSet("unsupported"); }
+  Promise.resolve(p).then(function(st){
+    var d=$("camdlg");
+    if(my!==CAM.tok||!d||!d.open){ try{ st.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} return; }
+    CAM.stream=st; var v=$("cam-v"); v.srcObject=st; try{ var pl=v.play(); if(pl&&pl.catch) pl.catch(function(){}); }catch(e){}
+    camFrames(my);
+  },function(err){
+    if(my!==CAM.tok) return;
+    var n=err&&err.name||"";
+    camSet(/NotAllowed|Security|PermissionDenied/.test(n)?"blocked":/NotFound|Overconstrained|DevicesNotFound/.test(n)?"none":/NotReadable|TrackStart|Abort/.test(n)?"busy":"unsupported");
+  });
+}
+/* The video plays and its frames are not black: a few 32x24 samples drawn to a canvas, checked for any bright pixel. */
+function camFrames(my){
+  var v=$("cam-v"),c=document.createElement("canvas"),ctx=null,tries=0,seen=0;
+  c.width=32; c.height=24; try{ ctx=c.getContext("2d",{willReadFrequently:true}); }catch(e){}
+  function sample(){
+    if(my!==CAM.tok) return; tries++;
+    if(v.readyState>=2&&v.videoWidth&&ctx){
+      try{ ctx.drawImage(v,0,0,32,24); var px=ctx.getImageData(0,0,32,24).data,mx=0,i,l;
+        for(i=0;i<px.length;i+=4){ l=(px[i]*299+px[i+1]*587+px[i+2]*114)/1000; if(l>mx) mx=l; }
+        seen++; if(mx>24) return camSet("ok"); }catch(e){ return camSet("ok"); }
+    }
+    if(seen>=6||tries>=30) return camSet("dark");
+    setTimeout(sample,250);
+  }
+  setTimeout(sample,150);
+}
+function camClose(){ camStop(); dlgClose($("camdlg")); }
+(function(){
+  var d=$("camdlg"); if(!d) return;
+  /* On close: stop every track (the camera light goes off), give focus back, and let the guide read the screen again. */
+  d.addEventListener("close",function(){ camStop(); var p=CAM.prev; CAM.prev=null; if(p&&p.isConnected&&p.focus) try{ p.focus(); }catch(e){}
+    if(CAM.quiet){ CAM.quiet=false; return; } if(VG&&VG.on){ VG.key=""; vgRender(); } });
+  d.addEventListener("keydown",function(e){ if(e.key==="Tab") trapTab(d,e); });
+})();
+function camUpload(){
+  CAM.prev=null; CAM.quiet=true; camClose();
+  var k=(DOCS[S.dk]||DOCS[0]).k,inp=(VIEW==="apply"&&S.step===1)?document.getElementById("up-"+k):null;
+  if(inp) try{ inp.focus(); }catch(e){}
+  announce(T("cam.upload.note")); vgSay(T("cam.upload.note"));
+}
+function vcClick(a){
+  if(a==="vg-toggle"){ vgSet(!VG.on); return true; }
+  if(a==="vg-stop"){ vgStop(); return true; }
+  if(a==="vg-mic"){ vgMic(); return true; }
+  if(a==="cam-check"){ camOpen("link"); return true; }
+  if(a==="cam-retry"){ camRun(); return true; }
+  if(a==="cam-cont"){ camClose(); return true; }
+  if(a==="cam-upload"){ camUpload(); return true; }
+  return false;
 }
 var RESTORED=restore(),RESET_HASH=location.hash.indexOf('#reset=')===0?location.hash:'';
 applyTheme(); applyLang();

@@ -44,6 +44,13 @@ SCENARIOS = [
 ]
 
 
+
+def close_camera_check(page):
+    """Start opens the 'Check your camera' dialog once (lane VC). Close it with Continue so the test goes on; uploads never need it."""
+    page.wait_for_selector("#camdlg[open]", timeout=15000)
+    page.click('#camdlg [data-act="cam-cont"]')
+    page.wait_for_function("()=>!document.getElementById('camdlg').open", timeout=15000)
+
 def heading_text(page):
     return page.evaluate(
         "() => [...document.querySelectorAll('#view-apply h1, #view-apply h2')]"
@@ -92,6 +99,7 @@ def pick_variants(page, tag):
 def open_to_documents(page):
     page.goto(f"{BASE}/?demo=1&v={random.randint(1, 10**9)}#apply")
     page.click('[data-act="begin"]', timeout=15000)
+    close_camera_check(page)
     page.evaluate("() => document.querySelectorAll('details.demo').forEach(d => d.open = true)")
     page.click('[data-act="sample"]', timeout=15000)
     for _ in range(4):

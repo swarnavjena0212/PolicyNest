@@ -32,6 +32,13 @@ PASSWORD = "Synthetic-Test-Pw-" + secrets.token_hex(4)  # generated per run, nev
 RESULTS = []
 
 
+
+def close_camera_check(page):
+    """Start opens the 'Check your camera' dialog once (lane VC). Close it with Continue so the test goes on; uploads never need it."""
+    page.wait_for_selector("#camdlg[open]", timeout=15000)
+    page.click('#camdlg [data-act="cam-cont"]')
+    page.wait_for_function("()=>!document.getElementById('camdlg').open", timeout=15000)
+
 def check(name, ok, detail=""):
     RESULTS.append((name, bool(ok), detail))
     print(("PASS " if ok else "FAIL ") + name + ((" :: " + str(detail)[:1200]) if (detail and not ok) else ""), flush=True)
@@ -232,6 +239,7 @@ def run(browser):
 
     A.page.evaluate("location.hash='#apply'")
     A.page.click('[data-act="begin"]')
+    close_camera_check(A.page)
     A.page.evaluate("document.querySelectorAll('details.demo').forEach(d=>d.open=true)")
     A.page.click('[data-act="sample"]')
     for _ in range(4):

@@ -38,6 +38,13 @@ SHOTS = os.environ.get("RV_SHOTS")  # optional folder for screenshots
 FULL_PAN = "BNZPS4821K"  # the sample applicant's typed PAN: it must never reach a reviewer screen
 
 
+
+def close_camera_check(page):
+    """Start opens the 'Check your camera' dialog once (lane VC). Close it with Continue so the test goes on; uploads never need it."""
+    page.wait_for_selector("#camdlg[open]", timeout=15000)
+    page.click('#camdlg [data-act="cam-cont"]')
+    page.wait_for_function("()=>!document.getElementById('camdlg').open", timeout=15000)
+
 def check(name, ok, detail=""):
     RESULTS.append((name, bool(ok), detail))
     print(("PASS " if ok else "FAIL ") + name + ((" :: " + str(detail)[:900]) if (detail and not ok) else ""), flush=True)
@@ -188,6 +195,7 @@ def apply_until_review(dev, label):
     """Details from the sample, the six practice documents with a borderline selfie (face score 0.68: a person decides), submit."""
     dev.hash("#apply")
     dev.page.click('[data-act="begin"]')
+    close_camera_check(dev.page)
     dev.page.evaluate("document.querySelectorAll('details.demo').forEach(d=>d.open=true)")
     dev.page.click('[data-act="sample"]')
     for _ in range(4):
@@ -441,6 +449,7 @@ def run_timer(browser):
     T.goto("#apply")
     T.page.check("#f-save")
     T.page.click('[data-act="begin"]')
+    close_camera_check(T.page)
     T.page.wait_for_selector("#fb-timer:not([hidden])")
     t0 = T.text("#fb-timer")
     check("timer starts at 30:00 and is a role=timer", t0 in ("30:00 left", "29:59 left") and T.page.get_attribute("#fb-timer", "role") == "timer", t0)
@@ -499,6 +508,7 @@ def _start_unsaved(dev):
     if dev.page.is_checked("#f-save"):
         dev.page.uncheck("#f-save")
     dev.page.click('[data-act="begin"]')
+    close_camera_check(dev.page)
     dev.page.wait_for_selector("#fb-timer:not([hidden])")
     dev.page.evaluate("document.querySelectorAll('details.demo').forEach(d=>d.open=true)")
     dev.page.click('[data-act="sample"]')
@@ -529,12 +539,21 @@ def run_timer_unsaved(browser):
     check("unsaved: the dialog offers Save to my account, Save on this device and Exit without saving",
           all(U.page.query_selector('#m-a [data-act="%s"]' % a) for a in ("m-more", "m-save-acct", "m-save-dev", "m-later"))
           and "Exit without saving" in acts, acts)
+    # Record every screen-reader announcement from here on: a later "Saved" status can overwrite #sr-status, so reading it once
+    # afterwards is racy. The check below still needs the exact time's-up confirmation to have been announced.
+    U.page.evaluate("""()=>{ window.__srlog=[]; const s=document.getElementById('sr-status');
+      new MutationObserver(()=>{ const t=s.textContent; if(t) window.__srlog.push(t); }).observe(s,{childList:true,characterData:true,subtree:true}); }""")
     U.page.click('[data-act="m-save-acct"]')
     U.page.wait_for_function("()=>location.hash==='#dashboard'", timeout=15000)
     srv = until(lambda: (lambda a: a if (a.get("details") or {}).get("name") else None)(U.api("GET", "/api/applications/me")["json"]["application"]))
     check("Save to my account and exit stores the typed details on the server", bool(srv) and srv["details"]["name"] == "Rahul Kumar Sharma",
           srv and srv.get("details"))
-    check("the confirmation says it is saved to the account", "Saved to your account" in U.text("#sr-status"), U.text("#sr-status"))
+    try:
+        U.page.wait_for_function("()=>(window.__srlog||[]).some(t=>/^Saved to your account\. You can come back/.test(t))", timeout=8000)
+        said = True
+    except Exception:  # noqa: BLE001
+        said = False
+    check("the confirmation says it is saved to the account", said, U.page.evaluate("window.__srlog||[]"))
     U.page.reload()
     U.page.wait_for_selector("#tb-refv", timeout=15000)
     U.hash("#apply")
