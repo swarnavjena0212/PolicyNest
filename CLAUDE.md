@@ -87,6 +87,17 @@ The numbered folders `01_…` to `08_…` in this directory are the source packa
 
 ## Deployment
 
+**Live since 17 Nov 2026 (commit `8813672`):** the reviewer side, the 30-minute timer, the voice guide, the camera check and the sign-out rate-limit fix.
+
+- **Server env var:** `ADMIN_INVITE_CODE` was added. Its value is in the user's git-ignored `.env`; never print or commit it.
+- **Live checks:**
+  - a reviewer sign-up is `reviewer_pending`, and pending accounts get 403 on the queue;
+  - applicants get 403 on the reviewer and admin routes;
+  - a wrong invite code gets 403;
+  - sign-out returns 200 and the session is gone;
+  - T1–T10 10/10 on the live demo.
+- **Status overview:** `PORTAL_STATUS.md`. The independent audit of the voice and camera build is still to do.
+
 **Live since 16 Nov 2026: the production applicant portal (commits up to `eaf7328`).**
 
 - **Sites:**
