@@ -774,6 +774,11 @@ body.landing .shell,body.landing .cp-fab,body.landing #cp,body.landing #focusbar
 html[data-theme="dark"] .lp-actions .btn:not(.pri){background:rgba(255,255,255,.88)}
 .lp-sec{display:flex;flex-direction:column;gap:12px}
 .lp-sec>h2{font-size:1.25rem}
+.dp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.dp-card{display:flex;flex-direction:column;gap:6px;text-align:left;background:var(--surface);color:var(--ink);border:2px dashed var(--brand);border-radius:var(--r);padding:18px;cursor:pointer;font:inherit;box-shadow:var(--shadow)}
+.dp-card b{font-family:var(--display);font-size:1.1rem}
+.dp-card:hover,.dp-card:focus-visible{border-style:solid;transform:translateY(-2px)}
+@media (max-width:640px){.dp-grid{grid-template-columns:1fr}}
 .lp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .lp-steps li{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow)}
 .lp-steps .n{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#141414;display:grid;place-items:center;font-family:var(--display);font-weight:700}
@@ -2258,6 +2263,7 @@ function renderWelcome(){
   h+='<div class="lp-in lp-two"><section class="box" aria-labelledby="lp-need-h"><h2 id="lp-need-h">'+TE("lp.need.h")+'</h2><p class="small">'+TE("lp.need.b",{docs:docs.join(T("ui.list_sep"))})+'</p><ul class="lp-docs">'+docs.map(function(d){return '<li>'+esc(d)+'</li>'}).join("")+'</ul><p class="small muted">'+TE("trust.1.b2")+'</p></section>'+
     '<section class="box" aria-labelledby="lp-prot-h"><h2 id="lp-prot-h">'+TE("lp.protect.h")+'</h2><ul class="small">'+["1","2","3","4","6","7"].map(function(i){return '<li>'+TE("trust.3.b"+i)+'</li>'}).join("")+'</ul>'+
     '<details class="dd"><summary>'+TE("trust.2.h")+'</summary><div class="ddb"><p>'+TE("trust.2.b1")+'</p><p>'+TE("trust.2.b2")+'</p></div></details></section></div>';
+  
   setHtml($("lp-main"),h);
 }
 /* ---- routing ---- */
@@ -2851,17 +2857,17 @@ function stepVerify(){
 }
 function stepTraining(){
   var hrs=0;S.mods.forEach(function(m,i){if(m)hrs+=MODULES[i][1]});
-  return '<div class="panel narrow"><div class="head"><h1>POSP training</h1><p>IRDAI requires 15 hours of training before the examination. Complete all five modules to unlock the exam.</p></div>'+
+  return '<div class="panel narrow"><div class="head"><h1>POSP training</h1><p>IRDAI requires 15 hours of training before the examination. Complete all '+MODULES.length+' parts to unlock the exam.</p></div>'+
   '<div><div class="prog" role="progressbar" aria-label="'+TE("pb.training")+'" aria-valuemin="0" aria-valuemax="15" aria-valuenow="'+hrs+'"><i style="width:'+(hrs/15*100)+'%"></i></div><p class="small muted" style="margin-top:6px"><b class="mono">'+hrs+'.0 / 15.0</b> hours logged</p></div>'+
   '<div class="note"><span><b>Training in this version.</b> Course content is not included here, so a module is logged in full the moment you mark it complete.</span></div>'+
   '<div class="mods">'+MODULES.map(function(m,i){return '<div class="mod"><div><b>'+m[0]+'</b><div class="small muted">'+m[1]+' hours</div></div>'+(S.mods[i]?pill("ok","Completed"):'<button class="btn sm" type="button" data-mod="'+i+'">Mark complete</button>')+'</div>'}).join("")+'</div>'+
-  '<div class="actions"><button class="btn pri" type="button" data-act="start-exam"'+(hrs>=15?"":" disabled")+'>Take the exam</button></div></div>';
+  '<div class="actions">'+'<button class="btn pri" type="button" data-act="start-exam"'+(hrs>=15?"":" disabled")+'>Take the exam</button></div></div>';
 }
 function stepExam(){
   var sc=S.exam.score;
   if(sc!==null&&sc<50) return '<div class="panel narrow"><div class="head"><h1>Not passed this time</h1><p>You scored '+sc+'%. The pass mark is 50%. A second attempt normally opens after 24 hours; here you can try again now.</p></div><div class="actions"><button class="btn pri" type="button" data-act="retry">Try again</button></div></div>';
   var all=QUIZ.every(function(_,i){return S.exam.ans[i]!==undefined});
-  return '<div class="panel narrow"><div class="head"><h1>POSP examination</h1><p>Five questions. The pass mark is 50%. This is a short paper, not the full exam.</p></div><div>'+
+  return '<div class="panel narrow"><div class="head"><h1>POSP examination</h1><p>Five questions. The pass mark is 50%. This is a short paper, not the full exam.</p></div>'+'<div>'+
   QUIZ.map(function(q,i){return '<fieldset class="q"><legend>'+(i+1)+'. '+q.q+'</legend>'+q.o.map(function(o,j){return '<label for="q'+i+'o'+j+'"><input type="radio" id="q'+i+'o'+j+'" name="q'+i+'" data-q="'+i+'" value="'+j+'"'+(S.exam.ans[i]===j?" checked":"")+'><span>'+o+'</span></label>'}).join("")+'</fieldset>'}).join("")+
   '</div><div class="actions"><button class="btn pri" type="button" data-act="submit-exam"'+(all?"":" disabled")+'>Submit answers</button></div></div>';
 }
@@ -3218,7 +3224,7 @@ document.addEventListener("click",function(e){
   if(t.getAttribute("data-cpq")) return cpAsk(t.getAttribute("data-cpq"));
   if(t.getAttribute("data-cpretry")!==null){ var rm=CP.log[Number(t.getAttribute("data-cpretry"))]; if(rm&&rm.q&&!CP.busy){ CP.log.splice(CP.log.indexOf(rm),1); cpDraw(); cpAsk(rm.q,true); } return; }
   if(t.getAttribute("data-mod")!==null){ var i=Number(t.getAttribute("data-mod")); S.mods[i]=true; log("HOURS_LOGGED","TRAINING_ENGINE",MODULES[i][0]+" · "+MODULES[i][1]+".0 h"); var hh=0;S.mods.forEach(function(m,j){if(m)hh+=MODULES[j][1]});
-    if(S.mods.every(Boolean)){setState("TRAINING_COMPLETED");log("TRAINING_COMPLETE","TRAINING_ENGINE","15.0 hours logged across 5 modules"); cheer("training complete!","All 15 hours are logged. You are ready for the exam.","star")}
+    if(S.mods.every(Boolean)){setState("TRAINING_COMPLETED");log("TRAINING_COMPLETE","TRAINING_ENGINE","15.0 hours logged across "+MODULES.length+" parts"); cheer("training complete!","All 15 hours are logged. You are ready for the exam.","star")}
     else cheer("module done: "+MODULES[i][0]+".",hh+" of 15 hours logged.","ok");
     return render(); }
   var a=t.getAttribute("data-act"); if(!a) return;
@@ -3255,7 +3261,8 @@ document.addEventListener("click",function(e){
   else if(a==="wait-out"){ signOut(); }
   else if(rvClick(t,a)){ }
   else if(a==="start-training"){ setState("TRAINING_IN_PROGRESS"); log("LMS_LOGIN","APPLICANT","Training modules unlocked"); go(3); }
-  else if(a==="start-exam"){ setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Attempt started"); go(4); }
+  else if(a==="start-exam"){ setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Attempt started");  go(4); }
+  
   else if(a==="retry"){ S.exam={ans:{},score:null}; setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Re-attempt (24-hour cooldown waived)"); render(); }
   else if(a==="submit-exam"){ var ok=0; QUIZ.forEach(function(q,i){ if(S.exam.ans[i]===q.a) ok++; }); S.exam.score=Math.round(ok/QUIZ.length*100);
     if(S.exam.score>=50){ setState("EXAM_PASSED"); log("EXAM_SUBMIT","SYSTEM","Score "+S.exam.score+"% · pass mark 50%"); S.posp="PN-POSP-"+S.appId.slice(-5); S.issued=new Date().toISOString().slice(0,10); S.seal=null; setState("CERTIFIED"); cheer("congratulations, you are certified!","You scored "+S.exam.score+"%. Your POSP code "+S.posp+" is active. Welcome to PolicyNest.","star"); log("ISSUE_CREDENTIAL","SYSTEM","POSP code "+S.posp+" issued · registry notification simulated"); go(5); }
