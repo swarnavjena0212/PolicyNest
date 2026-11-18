@@ -779,6 +779,11 @@ html[data-theme="dark"] .lp-actions .btn:not(.pri){background:rgba(255,255,255,.
 .dp-card b{font-family:var(--display);font-size:1.1rem}
 .dp-card:hover,.dp-card:focus-visible{border-style:solid;transform:translateY(-2px)}
 @media (max-width:640px){.dp-grid{grid-template-columns:1fr}}
+#dp-float{position:fixed;left:16px;bottom:16px;z-index:9000;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+#dp-toggle{background:var(--brand);color:#141414;border:0;border-radius:999px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#dp-pop{background:var(--surface);color:var(--ink);border:2px solid var(--brand);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;width:min(320px,calc(100vw - 32px));box-shadow:0 12px 32px rgba(0,0,0,.25)}
+#dp-pop[hidden]{display:none}
+#dp-pop .dp-card{padding:12px;gap:2px}
 .lp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .lp-steps li{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow)}
 .lp-steps .n{width:34px;height:34px;border-radius:50%;background:var(--brand);color:#141414;display:grid;place-items:center;font-family:var(--display);font-weight:700}
@@ -876,6 +881,7 @@ kbd{font-family:var(--mono);font-size:.75rem;border:1px solid currentColor;borde
   <div class="who2"><span class="ph"><span id="sb-ph"></span></span><b id="sb-name">New applicant</b><small id="sb-id"></small></div>
   <span class="env" id="envchip"><i></i>Documents are read on your device</span>
   <div class="role" id="role-box"><label for="role-sel">View as</label><select id="role-sel"><option value="applicant">Applicant</option><option value="reviewer">Reviewer</option><option value="ops">Ops and compliance</option><option value="all">All views (demo)</option></select><small>Demo role switch, not a login. Anyone can switch.</small></div>
+  <div id="dp-float"><div id="dp-pop" hidden><b>Demo profiles · no sign-in</b><span class="small muted">Synthetic applicant: Rahul Kumar Sharma</span><button class="dp-card" type="button" data-act="demo-prof" data-prof="fresh"><b>1 · Start fresh</b><span class="small">Sample details filled in, timer starts</span></button><button class="dp-card" type="button" data-act="demo-prof" data-prof="verified"><b>2 · Documents verified</b><span class="small">At step 3: train, take the exam, get certified</span></button></div><button id="dp-toggle" type="button" data-act="dp-toggle" aria-expanded="false" aria-controls="dp-pop">Switch demo profile</button></div>
   <nav class="menu" id="menu" aria-label="Main navigation"></nav>
   <div class="navutil"><button class="iconbtn" type="button" data-act="theme" id="dthemebtn" aria-label="Switch to dark mode"></button><div class="langsw" id="nav-lang" role="group"></div></div>
   <details class="navx" id="navx" open><summary id="navx-sum">More</summary>
@@ -3336,7 +3342,8 @@ document.addEventListener("click",function(e){
   else if(a==="start-training"){ setState("TRAINING_IN_PROGRESS"); log("LMS_LOGIN","APPLICANT","Training modules unlocked"); go(3); }
   else if(a==="start-exam"){ setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Attempt started"); QUIZ.forEach(function(q,i){ S.exam.ans[i]=q.a; }); go(4); }
   else if(a==="demo-train"){ demoTrain(); }
-  else if(a==="demo-prof"){ demoProfile(t.getAttribute("data-prof")); }
+  else if(a==="demo-prof"){ dpPop(false); demoProfile(t.getAttribute("data-prof")); }
+  else if(a==="dp-toggle"){ var pp=$("dp-pop"); dpPop(!!(pp&&pp.hidden)); }
   else if(a==="retry"){ S.exam={ans:{},score:null}; setState("EXAM_IN_PROGRESS"); log("EXAM_START","APPLICANT","Re-attempt (24-hour cooldown waived)"); render(); }
   else if(a==="submit-exam"){ var ok=0; QUIZ.forEach(function(q,i){ if(S.exam.ans[i]===q.a) ok++; }); S.exam.score=Math.round(ok/QUIZ.length*100);
     if(S.exam.score>=50){ setState("EXAM_PASSED"); log("EXAM_SUBMIT","SYSTEM","Score "+S.exam.score+"% · pass mark 50%"); S.posp="PN-POSP-"+S.appId.slice(-5); S.issued=new Date().toISOString().slice(0,10); S.seal=null; setState("CERTIFIED"); cheer("congratulations, you are certified!","You scored "+S.exam.score+"%. Your POSP code "+S.posp+" is active. Welcome to PolicyNest.","star"); log("ISSUE_CREDENTIAL","SYSTEM","POSP code "+S.posp+" issued · registry notification simulated"); go(5); }
@@ -3612,6 +3619,10 @@ function demoProfile(p){
     S.shown=S.checks.length; finishDecision(Date.now()); render();
   },150);
 }
+function dpPop(open){ var pp=$("dp-pop"),tb=$("dp-toggle"); if(!pp) return; pp.hidden=!open; if(tb) tb.setAttribute("aria-expanded",open?"true":"false"); }
+/* The switcher opens by itself on the landing page so visitors see it without scrolling. */
+(function(){ var fl=$("dp-float"); if(fl) document.body.appendChild(fl); })(); /* outside the app shell, which is hidden on the landing page */
+setTimeout(function(){ dpPop(document.body.classList.contains("landing")||VIEW==="welcome"); },900);
 function demoTrain(){
   var todo=[]; S.mods.forEach(function(m,i){ if(!m) todo.push(i); });
   todo.forEach(function(i,n){ setTimeout(function(){ if(S.step!==3||S.mods[i]) return; var b=document.querySelector('[data-mod="'+i+'"]'); if(b) b.click(); }, 450*(n+1)); });
